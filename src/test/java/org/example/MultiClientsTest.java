@@ -4,7 +4,6 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -165,7 +164,7 @@ class MultiClientsTest {
     }
 
     /**
-     * Test concurrent delayPop with multiple clients.
+     * Test concurrent delayPop with multiple clients (similar to testing pushValue).
      * Description:
      * Load n values to the stack.
      * Start n concurrent delayPop tasks with decrease delay time.
