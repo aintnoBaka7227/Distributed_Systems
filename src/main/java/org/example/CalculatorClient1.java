@@ -16,7 +16,7 @@ import java.rmi.registry.Registry;
  **/
 
 
-public class CalculatorClient {
+public class CalculatorClient1 {
     /**
      * Connect to the RMI registry and interact with the Calculator service
      * @param args [host, port?, name?]
@@ -87,3 +87,4 @@ public class CalculatorClient {
         }
     }
 }
+
