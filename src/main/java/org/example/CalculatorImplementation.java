@@ -101,7 +101,7 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
 
     private int gcd(int a, int b) {
         if (b == 0) {
-            return a;
+            return Math.abs(a);
         }
         return gcd(b, a % b);
     }
@@ -114,6 +114,7 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
      */
 
     private int lcm(int a, int b) {
+        if (a == 0 || b == 0) return 0;
         return Math.abs(a / gcd(a, b) * b);
     }
 
@@ -125,7 +126,7 @@ public class CalculatorImplementation extends UnicastRemoteObject implements Cal
      */
 
     @Override
-    public synchronized int delayPop(int millis) throws RemoteException {
+    public int delayPop(int millis) throws RemoteException {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ie) {
