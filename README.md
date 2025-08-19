@@ -13,17 +13,17 @@ and can perform basic operations such as Min, Max, Lcm, and Gcd.
 ├── lib/
 │   └── junit-platform-console-standalone.jar
 └── src/
-├── main/
-│   ├── java/org/example/
-│   │   ├── Calculator.java
-│   │   ├── CalculatorImplementation.java
-│   │   ├── CalculatorServer.java
-│   │   ├── CalculatorClient.java
-│   │
-│   └── resources/
-└── test/java/org/example/
-├── CalculatorImplTest.java
-└── MultiClientsTest.java
+    ├── main/
+    │       ├── java/org/example/
+    │       │   ├── Calculator.java
+    │       │   ├── CalculatorImplementation.java
+    │       │   ├── CalculatorServer.java
+    │       │   ├── CalculatorClient.java
+    │       │
+    │       └── resources/
+    └── test/java/org/example/
+        ├── CalculatorImplTest.java
+        └── MultiClientsTest.java
 
 ## Submitted files:
 - **Java sources**
