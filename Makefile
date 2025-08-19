@@ -1,30 +1,27 @@
-# Makefile (Linux/macOS)
-# Purpose:
-# - Compile application sources from src/main/java into ./out
-# - Optionally compile test sources from src/test/java and run them with JUnit 5
-# - Provide convenient targets to run the server/client
-#
-# Notes:
-# - This Makefile assumes a JDK is installed and 'javac'/'java' are on PATH.
-# - Classpath separator ':' is correct for Linux/macOS. On Windows use ';'.
-# - JUnit Console Standalone JAR is expected at lib/junit-platform-console-standalone-*.jar.
+# Makefile for assignment 1
 
-JAVAC := javac          # Java compiler
-JAVA  := java           # Java launcher
+# Purpose:
+# Compile application sources from src/main/java into ./out
+# Compile test sources from src/test/java and run them with JUnit 5
+# Targets to run server and client for manual terminal interface testing
+
+# Notes:
+# This Makefile assumes a JDK (21+) is installed and 'javac'/'java' are on PATH.
+# Unit Console Standalone JAR (1.10.0) is expected at lib/junit-platform-console-standalone-*.jar.
+
+JAVAC := javac
+JAVA  := java
 
 OUT := out
 SRC_MAIN := src/main/java
 SRC_TEST := src/test/java
 
-# Auto-detect the JUnit Console jar and strip any stray spaces
+# Detect the junit console jar and remove blank space in the path
 JUNIT_JAR := $(strip $(firstword $(wildcard lib/junit-platform-console-standalone*.jar)))
-# Fail early with a clear error if not found
-ifeq ($(JUNIT_JAR),)
-  $(error JUnit Console jar not found in ./lib. Place junit-platform-console-standalone-<version>.jar under lib/)
-endif
 
-# Build clean classpaths (no padding)
+# Build classpath to run client - server (main java implementation files)
 CP_APP := $(strip $(OUT))
+# Build classpath to compile test files using compiled main files and junit jar
 CP_TEST := $(strip $(OUT):$(JUNIT_JAR))
 
 .PHONY: all app tests run-server run-client test clean
@@ -32,38 +29,52 @@ CP_TEST := $(strip $(OUT):$(JUNIT_JAR))
 # Default target: build and run tests
 all: tests
 
-# Compile application sources only
+# Compile application main files only
 app: clean
-	@echo "Compiling application sources from $(SRC_MAIN) -> $(OUT)"
+	@echo "Compiling main java files from $(SRC_MAIN) -> $(OUT)"
 	mkdir -p $(OUT)
+	# End each input file name with null character to ensure name correctness
 	find $(SRC_MAIN) -name '*.java' -print0 | xargs -0 $(JAVAC) -d $(OUT)
 
-# Compile app + tests, then run tests
-tests: clean
-	@echo "Compiling application sources..."
-	mkdir -p $(OUT)
-	find $(SRC_MAIN) -name '*.java' -print0 | xargs -0 $(JAVAC) -d $(OUT)
-	@echo "Using JUnit jar: $(JUNIT_JAR)"
-	@echo "Compiling test sources with classpath: $(CP_TEST)"
-	# Collect test sources into an argfile to avoid xargs/quoting issues
-	find $(SRC_TEST) -name '*.java' > .test-sources
-	$(JAVAC) -cp "$(CP_TEST)" -d $(OUT) @.test-sources
-	rm -f .test-sources
+# Compile app files + tests, then run all tests
+all-tests: clean app
+	@echo "Using junit jar: $(JUNIT_JAR)"
+	@echo "Compiling test files with $(CP_TEST)"
+	find $(SRC_TEST) -name '*.java' -print0 | xargs -0 javac -cp "$(CP_TEST)" -d $(OUT)
 	@echo "Running tests..."
 	$(JAVA) -jar "$(JUNIT_JAR)" -cp "$(OUT)" --scan-classpath
 
-# Run the server (builds app first if needed)
-run-server: app
+# compile test by name
+compile-test: app
+	@echo "Compiling test: $(TEST)"
+	$(JAVAC) -cp "$(CP_TEST)" -d "$(OUT)" "$(SRC_TEST)/$(subst .,/,$(TEST)).java"
+
+# Run individual test files
+run-test: compile-test
+	@echo "Running test class: $(TEST)"
+	$(JAVA) -jar "$(JUNIT_JAR)" -cp "$(OUT)" --select-class="$(TEST)"
+
+# List of test files available
+list-tests:
+	@echo "Displayed test classes under $(SRC_TEST):"
+	@find "$(SRC_TEST)" -name '*Test.java' \
+	  | sed -e 's#^$(SRC_TEST)/##' -e 's#/#.#g' -e 's#\.java$$##'
+
+# Run the server
+server: app
 	@echo "Starting server..."
 	$(JAVA) -cp "$(CP_APP)" org.example.CalculatorServer
 
-# Run the client (builds app first if needed)
-run-client: app
+# Run the client
+client: app
 	@echo "Starting client..."
 	$(JAVA) -cp "$(CP_APP)" org.example.CalculatorClient
 
 # Alias
-test: tests
+test: run-test
+tests: all-tests
+run-server: server
+run-client: client
 
 # Clean compiled output
 clean:

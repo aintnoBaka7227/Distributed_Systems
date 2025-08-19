@@ -1,46 +1,42 @@
-# Assignment 1: Creating a simple Java RMI Calculator server
+# Assignment 1: Java RMI Calculator server
 
 ## Description: 
 For this assignment, I created a remote Calculator using Java RMI that can 
 handle multiple clients concurrently accessing the server using a shared stack
-and can perform basic operations such as Min, Max, Lcm and Gcd.
+and can perform basic operations such as Min, Max, Lcm, and Gcd.
 
-## Project layout: 
-./
-├─ Makefile
-├─ pom.xml
-├─ README.md
-├─ lib/
-│  └─ junit-platform-console-standalone.jar
-└─ src/
-├─ main/
-│  ├─ java/
-│  │  └─ org/
-│  │     └─ example/
-│  │        ├─ Calculator.java
-│  │        ├─ CalculatorImplementation.java
-│  │        ├─ CalculatorServer.java
-│  │        ├─ CalculatorClient.java
-│  │        ├─ CalculatorClient1.java
-│  │        └─ CalculatorClient2.java
-│  └─ resources/
-└─ test/
-└─ java/
-└─ org/
-└─ example/
-├─ CalculatorImplTest.java
-└─ MultiClientsTest.java
+## Project layout (Please ensure the layout is matched for Makefile to work): 
+.
+├── Makefile
+├── pom.xml
+├── README.md
+├── lib/
+│   └── junit-platform-console-standalone.jar
+└── src/
+├── main/
+│   ├── java/org/example/
+│   │   ├── Calculator.java
+│   │   ├── CalculatorImplementation.java
+│   │   ├── CalculatorServer.java
+│   │   ├── CalculatorClient.java
+│   │
+│   └── resources/
+└── test/java/org/example/
+├── CalculatorImplTest.java
+└── MultiClientsTest.java
 
 ## Submitted files:
-1. Java source files:
-Calculator.java: The remote Calculator interface.
-CalculatorImplementation.java: The remote Calculator implementation.
-CalculatorClient.java: Set up a client interface to the remote Calculator.
-CalculatorServer.java: Server bootstrap.
-2. Automated testing files: 
-CalculatorImplTest.java: Unit tests for the remote Calculator implementation.
-MultiClientsTest.java: Integration test for client-server communication (multiple clients).
-3. README.md: This file contains the implementation description.
+- **Java sources**
+    - `Calculator.java`: Remote Calculator interface
+    - `CalculatorImplementation.java`: Implementation of remote Calculator
+    - `CalculatorServer.java`: Server bootstrap
+    - `CalculatorClient.java`: Basic client
+- **Automated tests**
+    - `CalculatorImplTest.java`: Unit tests for Calculator
+    - `MultiClientsTest.java`: Integration test with multiple clients
+- **Others**
+    - `README.md`: Project documentation
+    - `Makefile`: Automation for build, test, and run 
 
 ## How it works:
 The server binds a single Calculator object to a registry on port 1099. 
@@ -49,18 +45,25 @@ The client can then perform operations on the Calculator object.
 It works for multiple clients concurrently accessing the server (treat the clients as threads).
 Currently, the server only supports a share stack. 
 
-
 ## Requirements:
-1. IntelliJ IDEA (optional)
-2. Java 21+
-3. Maven 3.9+
+1. JDK 21+ 
+2. Junit Platform console standalone version 1.10.0
+3. IntelliJ IDEA (optional)
+4. Maven 3.9+ (optional)
+
 
 ## Project setup: 
-1. Create a project with Maven
+1. Create a Maven project.
 2. In main/java/org.example, Add the Java source files. 
-3. In test/java/org.example, Create an "org.example" package and add the automated testing files. 
-4. In pom.xml, add the following dependencies:
+3. In test/java/org.example, Create an "org.example" package and add the automated testing files.
+4. Create a "lib" folder and install the Junit Platform console standalone version 1.10.0 jar file.
+5. In pom.xml, add the following dependency after the "properties" tag:
 ```pom.xml
+<properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 <dependencies>
     <dependency>
         <groupId>org.junit.jupiter</groupId>
@@ -70,28 +73,61 @@ Currently, the server only supports a share stack.
     </dependency>
   </dependencies>
 ```
-Navigating to Properties, change source and target to 21. Additional plugins may be required depending 
-on machines.
-5. Run the project.
 
 ## How to run: 
-There are two ways to run the project: using the run button that is built into IntelliJ IDEA or using the 
-terminal. The following steps are for using the terminal: 
-1. Download JDK 21+ and set up the environment variables.
-2. Compile all files (The "main" folder)
+There are two ways to run the project:
+1. Run the server and client in IntelliJ IDEA (Done easily with the run button).
+2. Run the server and client using the Makefile (terminal command: make).
+
+### Makefile usage
+Use Linux or run "bash" command in windows to open the Ubuntu terminal.
+
+#### Build
 ```bash
-javac *.java
+# Clean the output directory "out"
+# All compiled files will be deleted to avoid conflicts.
+make clean
+
+# Compile main application files
+make app
 ```
-3. Start the server
+
+#### Testings
+CalculatorImplTest: Unit tests for the remote Calculator implementation.
+MultiClientsTest: Integration test for client-server communication (multiple clients).
+
 ```bash
-java CalculatorServer.java
+# Run all tests: CalculatorImplTest and MultiClientsTest
+make tests
+# or 
+make all-tests
+
+/*************** Run individual tests ***************/
+
+# Print out the list of test files available
+make list-tests
+# example output: org.example.CalculatorImplTest
+
+# Run test based on the test compiled class name
+make run-test TEST=...
+# e.g: make run-test TEST=org.example.CalculatorImplTest
 ```
-4. Run the client (single client with terminal interface)
+
+#### Running the application
+Manually run the server and client. You must run the server first to allow the client 
+to connect to it. Use two separate terminals for this.
+
 ```bash
-java CalculatorClient.java
+# Run the server
+make server
+
+# Run the client
+# An interactive prompt will appear. Description for it is below.
+make client
 ```
+ 
 ## Using the client interface:
-After you start the server and run the client, in the terminal, A prompt line with "Input command" will appear. 
+After you start the server and launch the client, the terminal will display Input command: as a prompt. 
 You can enter the command and the server will respond with the result. 
 The following commands are supported:
 - pushValue <int>: enter an integer value to the stack.
@@ -109,20 +145,14 @@ example:
 - isEmpty
 - quit
 
-## Automation Testing: 
-- Automation test scripts are done with JUnit 5. Since automated test scripts are created with Maven and JUnit 5 
-using IntelliJ IDEA, it is recommended to use IntelliJ IDEA to run the test scripts.
-- Navigate to the run button in the top right corner of the IDE or the first button in the bottom left corner of 
-the IDE. Select the "current file" option and click the button to run the tests. 
-
 ## Notes
-- If the registry is not on PATH, use its absolute path from your JDK bin folder.
 - Ensure only one registry is running on port 1099.
-- If you change package or class names, update the java -cp commands accordingly.
+- If you change package or class names, update the Makefile accordingly.
+- If you change the port number, update CalculatorServer.java and CalculatorClient.java accordingly.
 
 ## Troubleshooting:
 - ConnectionException:Connection refused: start the server first before running the client.
-- Port number 1099 already in use: using another port (modify scripts) or kill the running process.
+- Port number 1099 already in use: using another port (modify scripts) or release port 1099.
 
 
 
