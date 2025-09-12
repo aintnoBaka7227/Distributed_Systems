@@ -50,11 +50,15 @@ public class ContentServer {
     }
 
     private void startRunning() {
-        while (true) {
+        while (true){
             try {
                 JsonObject jsonStationData = readStationData();
                 clock.increment();
-                sendPUT(jsonStationData);
+                boolean isSuccess = sendPUTRobustly(jsonStationData);
+                if (isSuccess) {
+                    System.out.println("Successfully send PUT Robustly for " + jsonStationData);
+                }
+                else System.out.println("Failed to send PUT Robustly for " + jsonStationData);
 
                 Thread.sleep(5000);
 
@@ -64,49 +68,98 @@ public class ContentServer {
         }
     }
 
-    private void sendPUT(JsonObject json) {
-        try {
 
-            URL url = new URL(SERVER_URL);
-            String host = url.getHost();
-            int port = (url.getPort() == -1) ? 4567 : url.getPort();
+    private int sendPUT(JsonObject json) throws IOException {
+        URI uri = URI.create(SERVER_URL);
+        String host = uri.getHost();
+        int port = (uri.getPort() == -1) ? 4567 : uri.getPort();
+        String endpoint = "/weather.json";
 
+        String body = gson.toJson(json);
+        byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
 
-            String body = gson.toJson(json);
-            byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(host, port), 5000);
+            socket.setSoTimeout(5000);
 
+            try (BufferedWriter wr = new BufferedWriter(
+                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+                 BufferedReader in = new BufferedReader(
+                         new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
 
-            try (Socket socket = new Socket(host, port);
-                 BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
-
-                String endpoint = "/weather.json";
-                // Build HTTP request manually
                 wr.write("PUT " + endpoint + " HTTP/1.1\r\n");
+                wr.write("Host: " + host + "\r\n");
                 wr.write("User-Agent: ATOMClient/1/0\r\n");
                 wr.write("Content-Type: application/json\r\n");
                 wr.write("Content-Length: " + bodyBytes.length + "\r\n");
                 wr.write("Clock: " + clock.getValue() + "\r\n");
-                wr.write("\r\n"); // blank line before body
+                wr.write("\r\n");
                 wr.write(body);
                 wr.flush();
 
-                // Read HTTP response
-                String responseLine;
-                System.out.println("=== Server Response ===");
-                while ((responseLine = in.readLine()) != null && !responseLine.isEmpty()) {
-                    System.out.println(responseLine);
+                String statusLine = in.readLine();
+                if (statusLine == null || !statusLine.startsWith("HTTP/1.1")) {
+                    throw new IOException("Invalid response from server");
                 }
-                System.out.println("=======================");
+                System.out.println("Response: " + statusLine);
 
+                String[] parts = statusLine.split(" ");
+                int statusCode = (parts.length >= 2) ? Integer.parseInt(parts[1]) : -1;
+
+                String header;
+                while ((header = in.readLine()) != null && !header.isEmpty()) {
+                    System.out.println(header);
+                    if (header.startsWith("Clock:")) {
+                        int serverClock = Integer.parseInt(header.split(":")[1].trim());
+                        clock.update(serverClock);
+                    }
+                }
+
+                return statusCode;
             }
-
-        } catch (IOException e) {
-            System.err.println("Error sending PUT request to Aggregation Server: " + e.getMessage());
-            // For debugging only; consider removing stack trace for submission
-            e.printStackTrace();
         }
     }
+
+
+
+    private boolean sendPUTRobustly(JsonObject json) {
+        int maxRetries = 3;
+        int baseDelay = 1000;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                int status = sendPUT(json);
+
+                if (status == 200 || status == 201) {
+                    if (status == 200) {
+                        System.out.println("Open connection to Aggregation Server");
+                    } else System.out.println("Update Station Data");
+                    System.out.println("Success on attempt " + attempt);
+                    return true;
+                } else if (status == 204) {
+                    System.out.println("No content, stopping retries.");
+                    return true;
+                } else if (status >= 400 && status < 500) {
+                    System.err.println("Client error " + status + ", not retrying.");
+                    return false;
+                } else if (status >= 500) {
+                    System.err.println("Server error " + status + " → will retry");
+                }
+
+            } catch (SocketTimeoutException e) {
+                System.err.println("Attempt " + attempt + ": no response in 5s → retrying");
+            } catch (IOException e) {
+                System.err.println("Network error: " + e.getMessage() + " → retrying");
+            }
+
+            int delay = baseDelay * (int) Math.pow(2, attempt - 1);
+            try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
+        }
+
+        System.err.println("All attempts failed after " + maxRetries + " retries.");
+        return false;
+    }
+
 
     private static String handleURL(String url) {
         if (!url.startsWith("http://")) {
@@ -129,8 +182,7 @@ public class ContentServer {
         }
 
         if ( url == null || filePath == null ) {
-            System.out.println("Usage: java ContentServer -url <server url> -f <station data file>");
-            System.exit(1);
+            throw new IllegalArgumentException("Usage: java ContentServer -url <server url> -f <station data file>");
         }
 
         url = handleURL(url);
