@@ -1,0 +1,4 @@
+compile ContentServer:
+javac -cp "lib/gson-2.13.2.jar" src/main/java/org/ContentServer.java src/main/java/org/LamportClock.java -d out
+java -cp "lib/gson-2.13.2.jar;out" org.ContentServer -url http://localhost:4567 -f src/main/java/org/test/station1
+
