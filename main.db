@@ -1,0 +1,48 @@
+{
+  "IDS70123": {
+    "data": {
+      "id": "IDS70123",
+      "name": "Sydney Observatory Hill",
+      "state": "NSW",
+      "time_zone": "AEST",
+      "lat": "-33.86",
+      "lon": "151.21",
+      "local_date_time": "15/04:00pm",
+      "local_date_time_full": "20230715160000",
+      "air_temp": "18.5",
+      "apparent_t": "17.2",
+      "cloud": "Mostly clear",
+      "dewpt": "10.4",
+      "press": "1018.6",
+      "rel_hum": "55",
+      "wind_dir": "NE",
+      "wind_spd_kmh": "20",
+      "wind_spd_kt": "11"
+    },
+    "lamportClockValue": 45,
+    "timestamp": 1757785203813
+  },
+  "IDS60901": {
+    "data": {
+      "id": "IDS60901",
+      "name": "Adelaide (West Terrace / ngayirdapira)",
+      "state": "SA",
+      "time_zone": "CST",
+      "lat": "-34.9",
+      "lon": "138.6",
+      "local_date_time": "15/05:00pm",
+      "local_date_time_full": "20230715170000",
+      "air_temp": "15.0",
+      "apparent_t": "11.2",
+      "cloud": "Cloudy",
+      "dewpt": "7.0",
+      "press": "1024.5",
+      "rel_hum": "58",
+      "wind_dir": "W",
+      "wind_spd_kmh": "25",
+      "wind_spd_kt": "13"
+    },
+    "lamportClockValue": 50,
+    "timestamp": 1757785207898
+  }
+}

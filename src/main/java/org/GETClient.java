@@ -2,14 +2,17 @@ package org;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.nio.charset.StandardCharsets;
-
 public class GETClient {
+
+    private static final Logger logger = Logger.getLogger(GETClient.class.getName());
 
     private final String SERVER_URL;
     private final String stationID;
@@ -27,15 +30,15 @@ public class GETClient {
                 clock.increment();
                 boolean isSuccess = getDataRobustly();
                 if (isSuccess) {
-                    System.out.println("Got data successfully!");
+                    logger.info("Got data successfully!");
                 } else {
-                    System.out.println("Failed to get data!");
+                    logger.warning("Failed to get data!");
                 }
 
                 Thread.sleep(5000);
 
             } catch (Exception e) {
-                System.err.println("GET Client error: " + e.getMessage());
+                logger.log(Level.SEVERE, "GET Client error: " + e.getMessage(), e);
             }
         }
     }
@@ -44,26 +47,26 @@ public class GETClient {
         int maxRetries = 3;
         int baseDelay = 1000;
 
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
             try {
                 int status = sendGET();
 
                 if (status == 200) {
                     return true;
                 } else if (status >= 400 && status < 500) {
-                    System.err.println("Client error " + status + ", not retrying.");
+                    logger.warning("Client error " + status + ", not retrying.");
                     return false;
-                } else if (status >= 500) {
-                    System.err.println("Server error " + status + ", retrying...");
+                } else if (status == 500) {
+                    logger.warning("Server error " + status + ", retrying...");
                 }
 
             } catch (SocketTimeoutException e) {
-                System.err.println("Timeout after 5s → retrying (attempt " + attempt + ")");
+                logger.warning("Timeout after 5s → retrying (attempt " + attempt + ")");
             } catch (IOException e) {
-                System.err.println("Network error: " + e.getMessage() + " → retrying (attempt " + attempt + ")");
+                logger.warning("Network error: " + e.getMessage() + " → retrying (attempt " + attempt + ")");
             }
 
-            int delay = baseDelay * (int) Math.pow(2, attempt - 1);
+            int delay = baseDelay * (int) Math.pow(2, attempt);
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException ignored) {}
@@ -78,9 +81,12 @@ public class GETClient {
         int port = (uri.getPort() == -1) ? 4567 : uri.getPort();
 
         String endpoint = "/weather.json";
-        if (stationID != null) {
+        if (stationID != null && !stationID.isEmpty()) {
             endpoint += "?id=" + stationID;
+        } else {
+            endpoint += "?id=";
         }
+
 
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), 5000);
@@ -102,7 +108,7 @@ public class GETClient {
                 if (statusLine == null || !statusLine.startsWith("HTTP/1.1")) {
                     throw new IOException("Invalid response from server");
                 }
-                System.out.println("Response: " + statusLine);
+                logger.info("Response: " + statusLine);
 
                 String[] parts = statusLine.split(" ");
                 int statusCode = (parts.length >= 2) ? Integer.parseInt(parts[1]) : -1;
@@ -121,8 +127,12 @@ public class GETClient {
                     body.append(line);
                 }
 
-                if (statusCode == 200) {
-                    displayWeather(body.toString());
+                if (!body.isEmpty()) {
+                    if (statusCode == 200) {
+                        displayWeather(body.toString());
+                    } else {
+                        logger.warning("Error response body: " + body);
+                    }
                 }
 
                 return statusCode;
@@ -131,16 +141,44 @@ public class GETClient {
     }
 
     private void displayWeather(String jsonString) {
-        JsonElement root = JsonParser.parseString(jsonString);
-        if (root.isJsonObject()) {
-            JsonObject obj = root.getAsJsonObject();
-            for (String key : obj.keySet()) {
-                System.out.println(key + " = " + obj.get(key).getAsString());
+        try {
+            JsonElement root = JsonParser.parseString(jsonString);
+
+            if (root.isJsonObject()) {
+                // If it's a single station JSON object
+                prettyPrintObject(root.getAsJsonObject(), "");
+            } else if (root.isJsonArray()) {
+                // If it's multiple stations, print each
+                int index = 1;
+                for (JsonElement element : root.getAsJsonArray()) {
+                    System.out.println("Station " + index + ":");
+                    if (element.isJsonObject()) {
+                        prettyPrintObject(element.getAsJsonObject(), "  "); // indent for clarity
+                    }
+                    index++;
+                    System.out.println();
+                }
+            } else {
+                logger.warning("Unexpected JSON format: " + jsonString);
             }
-        } else {
-            System.out.println("Invalid JSON response: " + jsonString);
+
+        } catch (Exception e) {
+            logger.warning("Failed to parse JSON: " + e.getMessage());
         }
     }
+
+    private void prettyPrintObject(JsonObject obj, String indent) {
+        for (String key : obj.keySet()) {
+            JsonElement value = obj.get(key);
+            if (value.isJsonObject()) {
+                System.out.println(indent + key + ":");
+                prettyPrintObject(value.getAsJsonObject(), indent + "  ");
+            } else {
+                System.out.println(indent + key + " = " + value.getAsString());
+            }
+        }
+    }
+
 
     private static String handleURL(String url) {
         if (!url.startsWith("http://")) {
@@ -169,5 +207,3 @@ public class GETClient {
         client.startRunning();
     }
 }
-
-

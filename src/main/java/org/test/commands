@@ -4,4 +4,8 @@ java -cp "lib/gson-2.13.2.jar;out" org.ContentServer -url http://localhost:4567 
 
 compile GETClient:
 javac -cp "lib/gson-2.13.2.jar" src/main/java/org/GETClient.java src/main/java/org/LamportClock.java -d out
-java -cp "lib/gson-2.13.2.jar;out" org.GETClient -url http://localhost:4567 -sid
+java -cp "lib/gson-2.13.2.jar;out" org.GETClient -url http://localhost:4567 -sid IDS60901
+
+compile Aggregation Server:
+javac -cp "lib/gson-2.13.2.jar" src/main/java/org/AggregationServer.java src/main/java/org/LamportClock.java src/main/java/org/StationData.java -d out
+java -cp "lib/gson-2.13.2.jar;out" org.AggregationServer -p

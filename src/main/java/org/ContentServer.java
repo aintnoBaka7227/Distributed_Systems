@@ -2,10 +2,13 @@ package org;
 
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.logging.*;
+
+
 
 /*
  * Content Server:
@@ -14,8 +17,9 @@ import com.google.gson.JsonObject;
  * Each request is sent with a Lamport Clock value
  * Fault Tolerance: resend based on response status
  */
-
 public class ContentServer {
+
+    private static final Logger logger = Logger.getLogger(ContentServer.class.getName());
 
     private final String FILE_PATH;
     private final String SERVER_URL;
@@ -29,44 +33,63 @@ public class ContentServer {
         this.gson = new Gson();
     }
 
-    private JsonObject readStationData() throws IOException {
+    private java.util.List<JsonObject> readStationData() throws IOException {
+        java.util.List<JsonObject> records = new ArrayList<>();
 
-        JsonObject data = new JsonObject();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH));
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+            JsonObject current = new JsonObject();
             String line;
+
             while ((line = reader.readLine()) != null) {
-                String[] stationData = line.split(":");
-                data.addProperty(stationData[0], stationData[1]);
+                line = line.trim();
+
+                if (line.isEmpty()) {
+                    if (!current.isEmpty()) {
+                        records.add(current);
+                        current = new JsonObject();
+                    }
+                } else {
+                    String[] stationData = line.split(":", 2);
+                    if (stationData.length == 2) {
+                        current.addProperty(stationData[0].trim(), stationData[1].trim());
+                    }
+                }
             }
-            reader.close();
-            System.out.println("Finished reading station data: " + data);
-            return data;
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + FILE_PATH);
-            e.printStackTrace();
-            return null;
+
+            // Add last record if file doesn’t end with blank line
+            if (!current.isEmpty()) {
+                records.add(current);
+            }
         }
+
+        logger.info("Read " + records.size() + " records from file " + FILE_PATH);
+        return records;
     }
 
     private void startRunning() {
-        while (true){
+        while (true) {
             try {
-                JsonObject jsonStationData = readStationData();
-                clock.increment();
-                boolean isSuccess = sendPUTRobustly(jsonStationData);
-                if (isSuccess) {
-                    System.out.println("Successfully send PUT Robustly for " + jsonStationData);
-                }
-                else System.out.println("Failed to send PUT Robustly for " + jsonStationData);
+                java.util.List<JsonObject> records = readStationData();
 
-                Thread.sleep(5000);
+                for (JsonObject record : records) {
+                    clock.increment();
+                    boolean isSuccess = sendPUTRobustly(record);
+                    if (isSuccess) {
+                        logger.info("PUT succeeded for " + record);
+                    } else {
+                        logger.warning("PUT failed for " + record);
+                    }
+                    Thread.sleep(3000); // space out PUTs
+                }
+
+                Thread.sleep(5000); // wait before re-reading file again
 
             } catch (Exception e) {
-                System.err.println("Content Server error:" + e.getMessage());
+                logger.log(Level.SEVERE, "Content Server error: " + e.getMessage(), e);
             }
         }
     }
+
 
 
     private int sendPUT(JsonObject json) throws IOException {
@@ -87,6 +110,7 @@ public class ContentServer {
                  BufferedReader in = new BufferedReader(
                          new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
 
+                // ---- send request ----
                 wr.write("PUT " + endpoint + " HTTP/1.1\r\n");
                 wr.write("Host: " + host + "\r\n");
                 wr.write("User-Agent: ATOMClient/1/0\r\n");
@@ -97,22 +121,34 @@ public class ContentServer {
                 wr.write(body);
                 wr.flush();
 
+                // ---- read response ----
                 String statusLine = in.readLine();
                 if (statusLine == null || !statusLine.startsWith("HTTP/1.1")) {
                     throw new IOException("Invalid response from server");
                 }
-                System.out.println("Response: " + statusLine);
+                logger.info("Response: " + statusLine);
 
                 String[] parts = statusLine.split(" ");
                 int statusCode = (parts.length >= 2) ? Integer.parseInt(parts[1]) : -1;
 
                 String header;
                 while ((header = in.readLine()) != null && !header.isEmpty()) {
-                    System.out.println(header);
+                    logger.fine("Header: " + header);
                     if (header.startsWith("Clock:")) {
                         int serverClock = Integer.parseInt(header.split(":")[1].trim());
                         clock.update(serverClock);
+                        logger.info("Updated Lamport clock to " + clock.getValue());
                     }
+                }
+
+                // ✅ Now capture the response body
+                StringBuilder responseBody = new StringBuilder();
+                String line;
+                while ((line = in.readLine()) != null) {
+                    responseBody.append(line).append("\n");
+                }
+                if (!responseBody.isEmpty()) {
+                    logger.info("Response body: " + responseBody.toString().trim());
                 }
 
                 return statusCode;
@@ -121,45 +157,43 @@ public class ContentServer {
     }
 
 
-
     private boolean sendPUTRobustly(JsonObject json) {
         int maxRetries = 3;
         int baseDelay = 1000;
 
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
             try {
                 int status = sendPUT(json);
 
                 if (status == 200 || status == 201) {
-                    if (status == 200) {
-                        System.out.println("Open connection to Aggregation Server");
-                    } else System.out.println("Update Station Data");
-                    System.out.println("Success on attempt " + attempt);
+                    logger.info("PUT success (status=" + status + ") on attempt " + attempt);
                     return true;
                 } else if (status == 204) {
-                    System.out.println("No content, stopping retries.");
+                    logger.warning("PUT returned 204 No Content. Stopping retries.");
                     return true;
                 } else if (status >= 400 && status < 500) {
-                    System.err.println("Client error " + status + ", not retrying.");
+                    logger.warning("Client error " + status + ". Not retrying.");
                     return false;
-                } else if (status >= 500) {
-                    System.err.println("Server error " + status + " → will retry");
+                } else if (status == 500) {
+                    logger.warning("Server error " + status + " → retrying...");
                 }
 
             } catch (SocketTimeoutException e) {
-                System.err.println("Attempt " + attempt + ": no response in 5s → retrying");
+                logger.warning("Attempt " + attempt + ": timeout after 5s → retrying");
             } catch (IOException e) {
-                System.err.println("Network error: " + e.getMessage() + " → retrying");
+                logger.warning("Attempt " + attempt + ": network error → " + e.getMessage());
             }
 
-            int delay = baseDelay * (int) Math.pow(2, attempt - 1);
-            try { Thread.sleep(delay); } catch (InterruptedException ignored) {}
+            int delay = baseDelay * (int) Math.pow(2, attempt);
+            logger.info("Retrying after " + delay + "ms");
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException ignored) {}
         }
 
-        System.err.println("All attempts failed after " + maxRetries + " retries.");
+        logger.severe("All " + maxRetries + " attempts failed. Aborting.");
         return false;
     }
-
 
     private static String handleURL(String url) {
         if (!url.startsWith("http://")) {
@@ -169,19 +203,24 @@ public class ContentServer {
     }
 
     public static void main(String[] args) throws IOException {
+        // Optional: configure logger format
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler h : rootLogger.getHandlers()) {
+            h.setFormatter(new SimpleFormatter());
+        }
+
         String url = null;
         String filePath = null;
 
-        for ( int i = 0; i < args.length; i++ ) {
-            if ( args[i].equals("-url") ) {
+        for (int i = 0; i < args.length; i++) {
+            if ("-url".equals(args[i])) {
                 url = args[++i];
-            }
-            else if ( args[i].equals("-f") ) {
+            } else if ("-f".equals(args[i])) {
                 filePath = args[++i];
             }
         }
 
-        if ( url == null || filePath == null ) {
+        if (url == null || filePath == null) {
             throw new IllegalArgumentException("Usage: java ContentServer -url <server url> -f <station data file>");
         }
 
