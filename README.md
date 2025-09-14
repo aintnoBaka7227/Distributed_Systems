@@ -6,24 +6,24 @@ handle multiple clients concurrently accessing the server using a shared stack
 and can perform basic operations such as Min, Max, Lcm, and Gcd.
 
 ## Project layout (Please ensure the layout is matched for Makefile to work): 
-.
-├── Makefile
-├── pom.xml
-├── README.md
+Distributed_Systems/
 ├── lib/
-│   └── junit-platform-console-standalone.jar
-└── src/
-    ├── main/
-    │       ├── java/org/example/
-    │       │   ├── Calculator.java
-    │       │   ├── CalculatorImplementation.java
-    │       │   ├── CalculatorServer.java
-    │       │   ├── CalculatorClient.java
-    │       │
-    │       └── resources/
-    └── test/java/org/example/
-        ├── CalculatorImplTest.java
-        └── MultiClientsTest.java
+│ ├── gson-2.13.2.jar
+│ └── junit-platform-console-standalone.jar
+├── src/
+│ ├── main/java/org/
+│ │ ├── AggregationServer.java
+│ │ ├── ContentServer.java
+│ │ ├── GETClient.java
+│ │ ├── LamportClock.java
+│ │ ├── StationData.java
+│ │ └── test/ (sample input station files)
+│ └── test/java/org/
+│ ├── LamportClockTest.java
+│ └── AggregationServerTest.java
+├── Makefile
+├── main.db
+└── README.md
 
 ## Submitted files:
 - **Java sources**

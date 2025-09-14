@@ -72,6 +72,12 @@ public class ContentServer {
                 java.util.List<JsonObject> records = readStationData();
 
                 for (JsonObject record : records) {
+
+                    if (!record.has("id")) {
+                        logger.warning("Skipping record with no id: " + record);
+                        continue;
+                    }
+
                     clock.increment();
                     boolean isSuccess = sendPUTRobustly(record);
                     if (isSuccess) {

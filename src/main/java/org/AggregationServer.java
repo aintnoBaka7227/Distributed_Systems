@@ -3,8 +3,6 @@ package org;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,8 +11,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 
 public class AggregationServer {
     private final int PORT;
@@ -23,14 +19,9 @@ public class AggregationServer {
     private final LamportClock clock;
     private final ExecutorService pool;
     private final ScheduledExecutorService scheduler;
-    private final File mainFile = new File("main.db");
-    private final File tempFile = new File("temp.db");
+    private final PersistenceManager persistenceManager;
     private final int expiryMillis = 30_000;
-    private final int storageLimit = 20;
-    private static ServerSocket serverSocket;
-
     private final Gson gson;
-
     private static final Logger logger = Logger.getLogger(AggregationServer.class.getName());
 
     AggregationServer(int port) {
@@ -42,6 +33,7 @@ public class AggregationServer {
         this.pool = Executors.newFixedThreadPool(10);
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.persistenceManager = new PersistenceManager("main.db", "temp.db", logger);
     }
 
     public void startRunning() throws IOException {
@@ -49,7 +41,7 @@ public class AggregationServer {
             // Recover persisted data before starting
             recoverDisk();
 
-            serverSocket = new ServerSocket(PORT);
+            ServerSocket serverSocket = new ServerSocket(PORT);
 
             // Schedule expiry task every 5 seconds
             scheduler.scheduleAtFixedRate(this::clearExpiredData, 5, 5, java.util.concurrent.TimeUnit.SECONDS);
@@ -76,14 +68,14 @@ public class AggregationServer {
 
             String requestLine = rd.readLine();
             if (requestLine == null || requestLine.split(" ").length < 2) {
-                System.out.println("HTTP/1.1 400 Bad Request");
+                sendResponse(wr, 400, "Bad Request", "{\"error\":\"Invalid request line\"}");
                 return;
             }
 
             String method = requestLine.split(" ")[0];
             String resource = requestLine.split(" ")[1];
 
-            // Read headers
+            // --- Read headers ---
             int contentLength = 0;
             int clientClock = -1;
             String header;
@@ -95,7 +87,17 @@ public class AggregationServer {
                 }
             }
 
-            if (method.equals("PUT") && resource.equals("/weather.json")) {
+            // --- Update server Lamport clock on receive ---
+            synchronized (clock) {
+                if (clientClock >= 0) {
+                    clock.update(clientClock);
+                }
+                // no increment yet — increment only in sendResponse
+                logger.info("Received request from " + clientSocket.getInetAddress() + ", update clock value: " + clock.getValue());
+            }
+
+            // --- Dispatch by method ---
+            if ("PUT".equals(method) && "/weather.json".equals(resource)) {
                 char[] buf = new char[contentLength];
                 int read = rd.read(buf);
                 if (read <= 0) {
@@ -105,18 +107,16 @@ public class AggregationServer {
                 String body = new String(buf, 0, read);
                 handlePUT(body, wr, clientClock);
 
-            } else if (method.equals("GET") && resource.startsWith("/weather.json")) {
-                System.out.println("GET: " + resource);
+            } else if ("GET".equals(method) && resource.startsWith("/weather.json")) {
                 String query = resource.contains("?") ? resource.substring(resource.indexOf("?") + 1) : null;
-                System.out.println("Query: " + query);
-                handleGET(query, wr, clientClock);
+                handleGET(query, wr);
 
             } else {
                 sendResponse(wr, 400, "Bad Request", "{\"error\":\"Invalid HTTP method\"}");
             }
 
         } catch (Exception e) {
-            System.err.println("Client handling error: " + e.getMessage());
+            logger.log(Level.SEVERE, "Client handling error", e);
         } finally {
             try { clientSocket.close(); } catch (IOException ignored) {}
         }
@@ -134,38 +134,28 @@ public class AggregationServer {
             }
 
             String id = json.get("id").getAsString();
-
-            // Update Lamport clock with client-provided value
-            int newClock;
-            synchronized (clock) {
-                clock.update(clientClock);
-                newClock = clock.getValue();
-            }
-
-            // Reject stale PUTs (Lamport ordering)
             StationData existing = weatherData.get(id);
+
+            // Check for stale update
             if (existing != null && clientClock < existing.lamportClockValue) {
                 sendResponse(wr, 409, "Conflict", "{\"error\":\"Stale PUT rejected\"}");
                 return;
             }
 
-            // Insert or update station data
             boolean isNew = (existing == null);
-            weatherData.put(id, new StationData(json, newClock, System.currentTimeMillis()));
+            weatherData.put(id, new StationData(json, clientClock, System.currentTimeMillis()));
 
-            // Enforce storage limit (keep 20 most recent)
+            int storageLimit = 20;
             if (weatherData.size() > storageLimit) {
                 weatherData.entrySet().stream()
                         .min(Comparator.comparingLong(e -> e.getValue().timestamp))
                         .map(Map.Entry::getKey).ifPresent(weatherData::remove);
             }
 
-            // Persist atomically
             persistentAtomicRewrite();
 
-            // Respond with success and Lamport clock
             sendResponse(wr, isNew ? 201 : 200, isNew ? "Created" : "OK",
-                    "{\"status\":\"Data stored successfully\"}", newClock);
+                    "{\"status\":\"Data stored successfully\"}");
 
         } catch (JsonSyntaxException e) {
             sendResponse(wr, 500, "Internal Server Error", "{\"error\":\"Invalid JSON\"}");
@@ -178,81 +168,75 @@ public class AggregationServer {
     }
 
 
-    private void handleGET(String resource, BufferedWriter wr, int clientClock) {
+
+
+    private void handleGET(String resource, BufferedWriter wr) {
+        rwLock.readLock().lock();
         try {
-            // Parse query parameter (e.g., /weather.json?id=IDS60901)
-            String[] parts = resource.split("\\?");
+            String[] parts = (resource != null) ? resource.split("\\?") : new String[0];
             String queryParam = (parts.length > 1) ? parts[1] : null;
 
-            rwLock.readLock().lock();
-            try {
-                // Tick Lamport clock
-                int clockValue;
-                synchronized (clock) {
-                    clock.update(clientClock);
-                    clockValue = clock.getValue();
-                }
 
-                // Case 1: GET for specific station
-                if (queryParam != null && queryParam.startsWith("id=")) {
-                    String stationId = queryParam.split("=")[1];
+            if (queryParam != null && queryParam.startsWith("id=")) {
+                String stationId = queryParam.split("=")[1];
 
-                    if (!stationId.isEmpty()) {
-                        StationData stationData = weatherData.get(stationId);
+                if (!stationId.isEmpty()) {
+                    StationData stationData = weatherData.get(stationId);
 
-                        if (stationData != null) {
-                            if (System.currentTimeMillis() - stationData.timestamp > expiryMillis) {
-                                weatherData.remove(stationId); // remove expired
-                                sendResponse(wr, 404, "Not Found", "{\"error\":\"Station expired\"}", clockValue);
-                            } else {
-                                String jsonResponse = gson.toJson(stationData.data);
-                                sendResponse(wr, 200, "OK", jsonResponse, clockValue);
-                            }
+                    if (stationData != null) {
+                        if (System.currentTimeMillis() - stationData.timestamp > expiryMillis) {
+                            weatherData.remove(stationId); // remove expired
+                            sendResponse(wr, 404, "Not Found", "{\"error\":\"Station expired\"}");
                         } else {
-                            sendResponse(wr, 404, "Not Found",
-                                    "{\"error\": \"Station ID not found\"}", clockValue);
+                            String jsonResponse = gson.toJson(stationData.data);
+                            sendResponse(wr, 200, "OK", jsonResponse);
                         }
-                        return;
+                    } else {
+                        sendResponse(wr, 404, "Not Found",
+                                "{\"error\": \"Station ID not found\"}");
                     }
+                    return;
                 }
-
-                // Case 2: return all stations (no query or empty id=)
-                long now = System.currentTimeMillis();
-                Map<String, JsonObject> validStations = new HashMap<>();
-                for (Map.Entry<String, StationData> entry : weatherData.entrySet()) {
-                    if (now - entry.getValue().timestamp <= expiryMillis) {
-                        validStations.put(entry.getKey(), entry.getValue().data);
-                    }
-                }
-
-                String jsonResponse = gson.toJson(validStations);
-                sendResponse(wr, 200, "OK", jsonResponse, clockValue);
-
-            } finally {
-                rwLock.readLock().unlock();
             }
 
+            // Case 2: return all stations (no query or empty id=)
+            long now = System.currentTimeMillis();
+            Map<String, JsonObject> validStations = new HashMap<>();
+            for (Map.Entry<String, StationData> entry : weatherData.entrySet()) {
+                if (now - entry.getValue().timestamp <= expiryMillis) {
+                    validStations.put(entry.getKey(), entry.getValue().data);
+                }
+            }
+
+            if (validStations.isEmpty()) {
+                sendResponse(wr, 204, "No Content", null);
+                return;
+            }
+
+            String jsonResponse = gson.toJson(validStations);
+            sendResponse(wr, 200, "OK", jsonResponse);
+
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error processing GET request", e);
             sendResponse(wr, 500, "Internal Server Error",
                     "{\"error\": \"Internal server error\"}");
-            logger.log(Level.SEVERE, "Error processing GET request", e);
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
-
-
-
     private void sendResponse(BufferedWriter wr, int statusCode, String statusMessage, String body) {
-        sendResponse(wr, statusCode, statusMessage, body, -1);
-    }
+        int clockValue;
+        synchronized (clock) {
+            clock.increment();              // increment once per response
+            clockValue = clock.getValue();  // snapshot
+            logger.info("Sending response, update clock value: " + clockValue);
+        }
 
-    private void sendResponse(BufferedWriter wr, int statusCode, String statusMessage, String body, int clockValue) {
         try {
             wr.write("HTTP/1.1 " + statusCode + " " + statusMessage + "\r\n");
             wr.write("Content-Type: application/json\r\n");
-            if (clockValue >= 0) {
-                wr.write("Clock: " + clockValue + "\r\n");
-            }
+            wr.write("Clock: " + clockValue + "\r\n");
             wr.write("\r\n");
             if (body != null) wr.write(body);
             wr.flush();
@@ -270,40 +254,13 @@ public class AggregationServer {
         } finally {
             rwLock.readLock().unlock();
         }
-
-        // Write to temp
-        try (FileOutputStream fos = new FileOutputStream(tempFile);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
-            writer.write(jsonData);
-            writer.flush();
-            fos.getFD().sync();
-        }
-
-        // Replace atomically
-        Files.move(tempFile.toPath(), mainFile.toPath(),
-                StandardCopyOption.REPLACE_EXISTING,
-                StandardCopyOption.ATOMIC_MOVE);
+        persistenceManager.save(jsonData);
     }
 
 
     private void recoverDisk() {
-        if (!mainFile.exists()) return;
-        try (BufferedReader reader = new BufferedReader(new FileReader(mainFile))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            Type type = new TypeToken<Map<String, StationData>>() {}.getType();
-            Map<String, StationData> restored = gson.fromJson(sb.toString(), type);
-
-            if (restored != null) {
-                weatherData.putAll(restored);
-            }
-            logger.info("Recovered " + weatherData.size() + " records from disk");
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error recovering from disk", e);
-        }
+        weatherData.clear();
+        weatherData.putAll(persistenceManager.load());
     }
 
 

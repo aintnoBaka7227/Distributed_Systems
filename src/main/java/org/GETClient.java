@@ -51,7 +51,7 @@ public class GETClient {
             try {
                 int status = sendGET();
 
-                if (status == 200) {
+                if (status == 200 || status == 204) {
                     return true;
                 } else if (status >= 400 && status < 500) {
                     logger.warning("Client error " + status + ", not retrying.");
@@ -115,9 +115,11 @@ public class GETClient {
 
                 String header;
                 while ((header = in.readLine()) != null && !header.isEmpty()) {
+                    logger.fine("Header: " + header);
                     if (header.startsWith("Clock:")) {
                         int serverClock = Integer.parseInt(header.split(":")[1].trim());
                         clock.update(serverClock);
+                        logger.info("Updated Lamport clock to " + clock.getValue());
                     }
                 }
 
