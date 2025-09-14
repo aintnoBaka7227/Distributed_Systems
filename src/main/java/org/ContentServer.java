@@ -6,9 +6,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.*;
-
-
 
 /*
  * Content Server:
@@ -72,7 +72,6 @@ public class ContentServer {
                 java.util.List<JsonObject> records = readStationData();
 
                 for (JsonObject record : records) {
-
                     if (!record.has("id")) {
                         logger.warning("Skipping record with no id: " + record);
                         continue;
@@ -80,32 +79,73 @@ public class ContentServer {
 
                     clock.increment();
                     boolean isSuccess = sendPUTRobustly(record);
+
                     if (isSuccess) {
-                        logger.info("PUT succeeded for " + record);
+                        logger.info("PUT succeeded for record id=" + record.get("id").getAsString());
                     } else {
-                        logger.warning("PUT failed for " + record);
+                        logger.warning("PUT failed for record id=" + record.get("id").getAsString());
                     }
+
                     Thread.sleep(3000); // space out PUTs
                 }
 
                 Thread.sleep(5000); // wait before re-reading file again
 
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Content Server error: " + e.getMessage(), e);
+                logger.log(Level.SEVERE, "Unexpected ContentServer error", e);
             }
         }
     }
 
+    private boolean sendPUTRobustly(JsonObject json) {
+        int maxRetries = 3;
+        int baseDelay = 1000;
 
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                HttpResponse res = sendPUT(json);
+                int status = res.getStatusCode();
 
-    private int sendPUT(JsonObject json) throws IOException {
+                if (status == 200 || status == 201) {
+                    logger.info("PUT success (status=" + status + ") on attempt " + attempt);
+                    return true;
+                } else if (status == 204) {
+                    logger.info("PUT returned 204 No Content. Treating as success.");
+                    return true;
+                } else if (status >= 400 && status < 500) {
+                    logger.warning("Client error " + status + " (record id=" + json.get("id") + "). Not retrying.");
+                    return false;
+                } else if (status == 500) {
+                    logger.warning("Server error " + status + " (record id=" + json.get("id") + ") → retrying...");
+                }
+
+            } catch (SocketTimeoutException e) {
+                logger.warning("Attempt " + attempt + " for record id=" + json.get("id") + ": timeout after 5s");
+            } catch (IOException e) {
+                logger.warning("Attempt " + attempt + " for record id=" + json.get("id") +
+                        ": network error → " + e.getMessage());
+            }
+
+            int delay = baseDelay * (int) Math.pow(2, attempt - 1);
+            logger.info("Retrying record id=" + json.get("id") + " after " + delay + "ms");
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException ignored) {}
+        }
+
+        logger.severe("All " + maxRetries + " attempts failed for record id=" + json.get("id"));
+        return false;
+    }
+
+    private HttpResponse sendPUT(JsonObject json) throws IOException {
         URI uri = URI.create(SERVER_URL);
         String host = uri.getHost();
         int port = (uri.getPort() == -1) ? 4567 : uri.getPort();
+        String body = gson.toJson(json);
         String endpoint = "/weather.json";
 
-        String body = gson.toJson(json);
-        byte[] bodyBytes = body.getBytes(StandardCharsets.UTF_8);
+        logger.info("Sending PUT to " + host + ":" + port + endpoint +
+                " with body: " + body);
 
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), 5000);
@@ -113,92 +153,23 @@ public class ContentServer {
 
             try (BufferedWriter wr = new BufferedWriter(
                     new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
-                 BufferedReader in = new BufferedReader(
+                 BufferedReader rd = new BufferedReader(
                          new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
 
-                // ---- send request ----
-                wr.write("PUT " + endpoint + " HTTP/1.1\r\n");
-                wr.write("Host: " + host + "\r\n");
-                wr.write("User-Agent: ATOMClient/1/0\r\n");
-                wr.write("Content-Type: application/json\r\n");
-                wr.write("Content-Length: " + bodyBytes.length + "\r\n");
-                wr.write("Clock: " + clock.getValue() + "\r\n");
-                wr.write("\r\n");
-                wr.write(body);
-                wr.flush();
+                // Build & send request
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                HttpRequest req = new HttpRequest("PUT", endpoint, headers, body, clock.getValue());
+                req.write(wr, host);
 
-                // ---- read response ----
-                String statusLine = in.readLine();
-                if (statusLine == null || !statusLine.startsWith("HTTP/1.1")) {
-                    throw new IOException("Invalid response from server");
+                // Parse response
+                HttpResponse resp = HttpResponse.parse(rd);
+                if (resp != null && resp.getClock() >= 0) {
+                    clock.update(resp.getClock());
                 }
-                logger.info("Response: " + statusLine);
-
-                String[] parts = statusLine.split(" ");
-                int statusCode = (parts.length >= 2) ? Integer.parseInt(parts[1]) : -1;
-
-                String header;
-                while ((header = in.readLine()) != null && !header.isEmpty()) {
-                    logger.fine("Header: " + header);
-                    if (header.startsWith("Clock:")) {
-                        int serverClock = Integer.parseInt(header.split(":")[1].trim());
-                        clock.update(serverClock);
-                        logger.info("Updated Lamport clock to " + clock.getValue());
-                    }
-                }
-
-                // ✅ Now capture the response body
-                StringBuilder responseBody = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    responseBody.append(line).append("\n");
-                }
-                if (!responseBody.isEmpty()) {
-                    logger.info("Response body: " + responseBody.toString().trim());
-                }
-
-                return statusCode;
+                return resp;
             }
         }
-    }
-
-
-    private boolean sendPUTRobustly(JsonObject json) {
-        int maxRetries = 3;
-        int baseDelay = 1000;
-
-        for (int attempt = 0; attempt < maxRetries; attempt++) {
-            try {
-                int status = sendPUT(json);
-
-                if (status == 200 || status == 201) {
-                    logger.info("PUT success (status=" + status + ") on attempt " + attempt);
-                    return true;
-                } else if (status == 204) {
-                    logger.warning("PUT returned 204 No Content. Stopping retries.");
-                    return true;
-                } else if (status >= 400 && status < 500) {
-                    logger.warning("Client error " + status + ". Not retrying.");
-                    return false;
-                } else if (status == 500) {
-                    logger.warning("Server error " + status + " → retrying...");
-                }
-
-            } catch (SocketTimeoutException e) {
-                logger.warning("Attempt " + attempt + ": timeout after 5s → retrying");
-            } catch (IOException e) {
-                logger.warning("Attempt " + attempt + ": network error → " + e.getMessage());
-            }
-
-            int delay = baseDelay * (int) Math.pow(2, attempt);
-            logger.info("Retrying after " + delay + "ms");
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException ignored) {}
-        }
-
-        logger.severe("All " + maxRetries + " attempts failed. Aborting.");
-        return false;
     }
 
     private static String handleURL(String url) {
@@ -208,12 +179,17 @@ public class ContentServer {
         return url;
     }
 
-    public static void main(String[] args) throws IOException {
-        // Optional: configure logger format
+    public static void main(String[] args) {
+        // Configure logger
         Logger rootLogger = Logger.getLogger("");
         for (Handler h : rootLogger.getHandlers()) {
-            h.setFormatter(new SimpleFormatter());
+            rootLogger.removeHandler(h);
         }
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.ALL);
+        handler.setFormatter(new SimpleFormatter());
+        rootLogger.addHandler(handler);
+        rootLogger.setLevel(Level.ALL);
 
         String url = null;
         String filePath = null;

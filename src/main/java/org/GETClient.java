@@ -3,15 +3,12 @@ package org;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.*;
+import com.google.gson.*;
 
 public class GETClient {
-
     private static final Logger logger = Logger.getLogger(GETClient.class.getName());
 
     private final String SERVER_URL;
@@ -30,15 +27,15 @@ public class GETClient {
                 clock.increment();
                 boolean isSuccess = getDataRobustly();
                 if (isSuccess) {
-                    logger.info("Got data successfully!");
+                    logger.info("Data retrieved successfully.");
                 } else {
-                    logger.warning("Failed to get data!");
+                    logger.warning("Failed to retrieve data after retries.");
                 }
 
                 Thread.sleep(5000);
 
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "GET Client error: " + e.getMessage(), e);
+                logger.log(Level.SEVERE, "Unexpected error in GET client loop", e);
             }
         }
     }
@@ -47,17 +44,23 @@ public class GETClient {
         int maxRetries = 3;
         int baseDelay = 1000;
 
-        for (int attempt = 0; attempt < maxRetries; attempt++) {
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                int status = sendGET();
+                HttpResponse res = sendGET();
+                int status = res.getStatusCode();
 
-                if (status == 200 || status == 204) {
+                if (status == 200) {
+                    logger.info("HTTP 200 OK (station=" + stationID + ", clock=" + res.getClock() + ")");
+                    displayWeather(res.getBody());
                     return true;
                 } else if (status >= 400 && status < 500) {
-                    logger.warning("Client error " + status + ", not retrying.");
+                    logger.warning("Client error " + status + " – not retrying.");
                     return false;
                 } else if (status == 500) {
-                    logger.warning("Server error " + status + ", retrying...");
+                    logger.warning("Server error " + status + " – retrying (attempt " + attempt + ")");
+                } else if (status == 204) {
+                    logger.info("No content available for station=" + stationID);
+                    return true;
                 }
 
             } catch (SocketTimeoutException e) {
@@ -66,7 +69,7 @@ public class GETClient {
                 logger.warning("Network error: " + e.getMessage() + " → retrying (attempt " + attempt + ")");
             }
 
-            int delay = baseDelay * (int) Math.pow(2, attempt);
+            int delay = baseDelay * (int) Math.pow(2, attempt - 1);
             try {
                 Thread.sleep(delay);
             } catch (InterruptedException ignored) {}
@@ -75,18 +78,14 @@ public class GETClient {
         return false;
     }
 
-    private int sendGET() throws IOException {
+    private HttpResponse sendGET() throws IOException {
         URI uri = URI.create(SERVER_URL);
         String host = uri.getHost() != null ? uri.getHost() : SERVER_URL.split(":")[0];
         int port = (uri.getPort() == -1) ? 4567 : uri.getPort();
 
-        String endpoint = "/weather.json";
-        if (stationID != null && !stationID.isEmpty()) {
-            endpoint += "?id=" + stationID;
-        } else {
-            endpoint += "?id=";
-        }
-
+        String endpoint = (stationID != null && !stationID.isEmpty())
+                ? "/weather.json?id=" + stationID
+                : "/weather.json";
 
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), 5000);
@@ -94,50 +93,19 @@ public class GETClient {
 
             try (BufferedWriter wr = new BufferedWriter(
                     new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
-                 BufferedReader in = new BufferedReader(
+                 BufferedReader rd = new BufferedReader(
                          new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
 
-                wr.write("GET " + endpoint + " HTTP/1.1\r\n");
-                wr.write("Host: " + host + "\r\n");
-                wr.write("User-Agent: ATOMClient/1/0\r\n");
-                wr.write("Clock: " + clock.getValue() + "\r\n");
-                wr.write("\r\n");
-                wr.flush();
+                Map<String, String> headers = new HashMap<>();
+                headers.put("accept", "application/json");
+                HttpRequest req = new HttpRequest("GET", endpoint, headers, null, clock.getValue());
+                req.write(wr, host);
 
-                String statusLine = in.readLine();
-                if (statusLine == null || !statusLine.startsWith("HTTP/1.1")) {
-                    throw new IOException("Invalid response from server");
+                HttpResponse resp = HttpResponse.parse(rd);
+                if (resp != null && resp.getClock() >= 0) {
+                    clock.update(resp.getClock());
                 }
-                logger.info("Response: " + statusLine);
-
-                String[] parts = statusLine.split(" ");
-                int statusCode = (parts.length >= 2) ? Integer.parseInt(parts[1]) : -1;
-
-                String header;
-                while ((header = in.readLine()) != null && !header.isEmpty()) {
-                    logger.fine("Header: " + header);
-                    if (header.startsWith("Clock:")) {
-                        int serverClock = Integer.parseInt(header.split(":")[1].trim());
-                        clock.update(serverClock);
-                        logger.info("Updated Lamport clock to " + clock.getValue());
-                    }
-                }
-
-                StringBuilder body = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    body.append(line);
-                }
-
-                if (!body.isEmpty()) {
-                    if (statusCode == 200) {
-                        displayWeather(body.toString());
-                    } else {
-                        logger.warning("Error response body: " + body);
-                    }
-                }
-
-                return statusCode;
+                return resp;
             }
         }
     }
@@ -147,20 +115,36 @@ public class GETClient {
             JsonElement root = JsonParser.parseString(jsonString);
 
             if (root.isJsonObject()) {
-                // If it's a single station JSON object
-                prettyPrintObject(root.getAsJsonObject(), "");
-            } else if (root.isJsonArray()) {
-                // If it's multiple stations, print each
+                JsonObject obj = root.getAsJsonObject();
+
+                // Case 1: This object looks like multiple stations (map keyed by ID)
+                boolean isMultiStation = obj.entrySet().stream()
+                        .allMatch(e -> e.getValue().isJsonObject());
+
+                if (isMultiStation) {
+                    for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+                        System.out.println(entry.getKey() + ":");
+                        System.out.println(formatStation(entry.getValue().getAsJsonObject()));
+                        System.out.println(); // blank line between stations
+                    }
+                }
+                // Case 2: Just a single station record
+                else {
+                    System.out.println(formatStation(obj));
+                }
+            }
+            else if (root.isJsonArray()) {
                 int index = 1;
                 for (JsonElement element : root.getAsJsonArray()) {
-                    System.out.println("Station " + index + ":");
                     if (element.isJsonObject()) {
-                        prettyPrintObject(element.getAsJsonObject(), "  "); // indent for clarity
+                        System.out.println("Station " + index + ":");
+                        System.out.println(formatStation(element.getAsJsonObject()));
+                        System.out.println();
                     }
                     index++;
-                    System.out.println();
                 }
-            } else {
+            }
+            else {
                 logger.warning("Unexpected JSON format: " + jsonString);
             }
 
@@ -169,29 +153,41 @@ public class GETClient {
         }
     }
 
-    private void prettyPrintObject(JsonObject obj, String indent) {
+
+    /** Format a station JSON object into key:value lines (like the input file). */
+    private String formatStation(JsonObject obj) {
+        StringBuilder sb = new StringBuilder();
         for (String key : obj.keySet()) {
             JsonElement value = obj.get(key);
             if (value.isJsonObject()) {
-                System.out.println(indent + key + ":");
-                prettyPrintObject(value.getAsJsonObject(), indent + "  ");
+                sb.append(key).append(":\n");
+                sb.append(formatStation(value.getAsJsonObject())); // recursive
             } else {
-                System.out.println(indent + key + " = " + value.getAsString());
+                sb.append(key).append(": ").append(value.getAsString()).append("\n");
             }
         }
+        return sb.toString().trim();
     }
 
 
     private static String handleURL(String url) {
-        if (!url.startsWith("http://")) {
-            return "http://" + url;
-        }
+        if (!url.startsWith("http://")) return "http://" + url;
         return url;
     }
 
     public static void main(String[] args) {
-        String serverUrl = null;
-        String stationId = null;
+        // Configure logger
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler h : rootLogger.getHandlers()) {
+            rootLogger.removeHandler(h);
+        }
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.ALL);
+        handler.setFormatter(new SimpleFormatter());
+        rootLogger.addHandler(handler);
+        rootLogger.setLevel(Level.ALL);
+
+        String serverUrl = null, stationId = null;
         for (int i = 0; i < args.length; i++) {
             if ("-url".equals(args[i]) && i + 1 < args.length) {
                 serverUrl = args[++i];
@@ -202,10 +198,7 @@ public class GETClient {
         if (serverUrl == null) {
             throw new IllegalArgumentException("Usage: java GETClient -url {server url} [-sid stationID]");
         }
-
         serverUrl = handleURL(serverUrl);
-
-        GETClient client = new GETClient(serverUrl, stationId);
-        client.startRunning();
+        new GETClient(serverUrl, stationId).startRunning();
     }
 }

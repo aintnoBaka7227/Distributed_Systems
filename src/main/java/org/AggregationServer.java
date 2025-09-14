@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +26,6 @@ public class AggregationServer {
     private static final Logger logger = Logger.getLogger(AggregationServer.class.getName());
 
     AggregationServer(int port) {
-
         this.PORT = port;
         this.weatherData = new HashMap<>();
         this.rwLock = new ReentrantReadWriteLock();
@@ -37,80 +37,37 @@ public class AggregationServer {
     }
 
     public void startRunning() throws IOException {
-        try {
-            // Recover persisted data before starting
-            recoverDisk();
+        weatherData.putAll(persistenceManager.load());
 
-            ServerSocket serverSocket = new ServerSocket(PORT);
+        ServerSocket serverSocket = new ServerSocket(PORT);
+        scheduler.scheduleAtFixedRate(this::clearExpiredData, 5, 5, TimeUnit.SECONDS);
 
-            // Schedule expiry task every 5 seconds
-            scheduler.scheduleAtFixedRate(this::clearExpiredData, 5, 5, java.util.concurrent.TimeUnit.SECONDS);
+        logger.info("Aggregation Server running on port " + PORT);
 
-            logger.info("Aggregation Server running on port " + PORT);
-
-            while (true) {
-                try {
-                    Socket clientSocket = serverSocket.accept();
-                    pool.submit(() -> handleRequest(clientSocket));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            pool.submit(() -> handleRequest(clientSocket));
         }
     }
 
-
     private void handleRequest(Socket clientSocket) {
-        try (BufferedReader rd = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
-             BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader rd = new BufferedReader(
+                new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
+             BufferedWriter wr = new BufferedWriter(
+                     new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8))) {
 
-            String requestLine = rd.readLine();
-            if (requestLine == null || requestLine.split(" ").length < 2) {
-                sendResponse(wr, 400, "Bad Request", "{\"error\":\"Invalid request line\"}");
-                return;
-            }
+            HttpRequest req = HttpRequest.parse(rd);
 
-            String method = requestLine.split(" ")[0];
-            String resource = requestLine.split(" ")[1];
-
-            // --- Read headers ---
-            int contentLength = 0;
-            int clientClock = -1;
-            String header;
-            while ((header = rd.readLine()) != null && !header.isEmpty()) {
-                if (header.toLowerCase().startsWith("content-length:")) {
-                    contentLength = Integer.parseInt(header.split(":")[1].trim());
-                } else if (header.toLowerCase().startsWith("clock:")) {
-                    clientClock = Integer.parseInt(header.split(":")[1].trim());
-                }
-            }
-
-            // --- Update server Lamport clock on receive ---
             synchronized (clock) {
-                if (clientClock >= 0) {
-                    clock.update(clientClock);
+                if (req.getClock() >= 0) {
+                    clock.update(req.getClock());
                 }
-                // no increment yet — increment only in sendResponse
-                logger.info("Received request from " + clientSocket.getInetAddress() + ", update clock value: " + clock.getValue());
             }
 
-            // --- Dispatch by method ---
-            if ("PUT".equals(method) && "/weather.json".equals(resource)) {
-                char[] buf = new char[contentLength];
-                int read = rd.read(buf);
-                if (read <= 0) {
-                    sendResponse(wr, 204, "No Content", null);
-                    return;
-                }
-                String body = new String(buf, 0, read);
-                handlePUT(body, wr, clientClock);
-
-            } else if ("GET".equals(method) && resource.startsWith("/weather.json")) {
-                String query = resource.contains("?") ? resource.substring(resource.indexOf("?") + 1) : null;
-                handleGET(query, wr);
-
+            if ("PUT".equals(req.getMethod()) && "/weather.json".equals(req.getResource())) {
+                handlePUT(req, wr);
+            } else if ("GET".equals(req.getMethod()) && req.getResource().startsWith("/weather.json")) {
+                handleGET(req, wr);
             } else {
                 sendResponse(wr, 400, "Bad Request", "{\"error\":\"Invalid HTTP method\"}");
             }
@@ -122,12 +79,16 @@ public class AggregationServer {
         }
     }
 
-    private void handlePUT(String body, BufferedWriter wr, int clientClock) {
+    private void handlePUT(HttpRequest req, BufferedWriter wr) {
         rwLock.writeLock().lock();
         try {
-            JsonObject json = JsonParser.parseString(body).getAsJsonObject();
+            if (req.getBody() == null || req.getBody().trim().isEmpty()) {
+                // No content in the PUT request
+                sendResponse(wr, 204, "No Content", null);
+                return;
+            }
 
-            // Validate station id
+            JsonObject json = JsonParser.parseString(req.getBody()).getAsJsonObject();
             if (!json.has("id") || json.get("id").getAsString().isEmpty()) {
                 sendResponse(wr, 400, "Bad Request", "{\"error\":\"Missing station ID\"}");
                 return;
@@ -136,70 +97,55 @@ public class AggregationServer {
             String id = json.get("id").getAsString();
             StationData existing = weatherData.get(id);
 
-            // Check for stale update
-            if (existing != null && clientClock < existing.lamportClockValue) {
+            if (existing != null && req.getClock() < existing.lamportClockValue) {
                 sendResponse(wr, 409, "Conflict", "{\"error\":\"Stale PUT rejected\"}");
                 return;
             }
 
             boolean isNew = (existing == null);
-            weatherData.put(id, new StationData(json, clientClock, System.currentTimeMillis()));
+            weatherData.put(id, new StationData(json, req.getClock(), System.currentTimeMillis()));
 
-            int storageLimit = 20;
-            if (weatherData.size() > storageLimit) {
+            if (weatherData.size() > 20) {
                 weatherData.entrySet().stream()
                         .min(Comparator.comparingLong(e -> e.getValue().timestamp))
                         .map(Map.Entry::getKey).ifPresent(weatherData::remove);
             }
 
-            persistentAtomicRewrite();
+            persistenceManager.save(gson.toJson(weatherData));
 
             sendResponse(wr, isNew ? 201 : 200, isNew ? "Created" : "OK",
                     "{\"status\":\"Data stored successfully\"}");
 
-        } catch (JsonSyntaxException e) {
-            sendResponse(wr, 500, "Internal Server Error", "{\"error\":\"Invalid JSON\"}");
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Persistence error", e);
-            sendResponse(wr, 500, "Internal Server Error", "{\"error\":\"Persistence failed\"}");
+        } catch (Exception e) {
+            sendResponse(wr, 500, "Internal Server Error", "{\"error\":\"Invalid JSON or Persistence failure\"}");
         } finally {
             rwLock.writeLock().unlock();
         }
     }
 
-
-
-
-    private void handleGET(String resource, BufferedWriter wr) {
+    private void handleGET(HttpRequest req, BufferedWriter wr) {
         rwLock.readLock().lock();
         try {
-            String[] parts = (resource != null) ? resource.split("\\?") : new String[0];
-            String queryParam = (parts.length > 1) ? parts[1] : null;
-
+            String resource = req.getResource();
+            String queryParam = resource.contains("?") ? resource.split("\\?")[1] : null;
 
             if (queryParam != null && queryParam.startsWith("id=")) {
                 String stationId = queryParam.split("=")[1];
+                StationData stationData = weatherData.get(stationId);
 
-                if (!stationId.isEmpty()) {
-                    StationData stationData = weatherData.get(stationId);
-
-                    if (stationData != null) {
-                        if (System.currentTimeMillis() - stationData.timestamp > expiryMillis) {
-                            weatherData.remove(stationId); // remove expired
-                            sendResponse(wr, 404, "Not Found", "{\"error\":\"Station expired\"}");
-                        } else {
-                            String jsonResponse = gson.toJson(stationData.data);
-                            sendResponse(wr, 200, "OK", jsonResponse);
-                        }
+                if (stationData != null) {
+                    if (System.currentTimeMillis() - stationData.timestamp > expiryMillis) {
+                        weatherData.remove(stationId);
+                        sendResponse(wr, 404, "Not Found", "{\"error\":\"Station expired\"}");
                     } else {
-                        sendResponse(wr, 404, "Not Found",
-                                "{\"error\": \"Station ID not found\"}");
+                        sendResponse(wr, 200, "OK", gson.toJson(stationData.data));
                     }
-                    return;
+                } else {
+                    sendResponse(wr, 404, "Not Found", "{\"error\": \"Station ID not found\"}");
                 }
+                return;
             }
 
-            // Case 2: return all stations (no query or empty id=)
             long now = System.currentTimeMillis();
             Map<String, JsonObject> validStations = new HashMap<>();
             for (Map.Entry<String, StationData> entry : weatherData.entrySet()) {
@@ -210,16 +156,12 @@ public class AggregationServer {
 
             if (validStations.isEmpty()) {
                 sendResponse(wr, 204, "No Content", null);
-                return;
+            } else {
+                sendResponse(wr, 200, "OK", gson.toJson(validStations));
             }
 
-            String jsonResponse = gson.toJson(validStations);
-            sendResponse(wr, 200, "OK", jsonResponse);
-
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error processing GET request", e);
-            sendResponse(wr, 500, "Internal Server Error",
-                    "{\"error\": \"Internal server error\"}");
+            sendResponse(wr, 500, "Internal Server Error", "{\"error\": \"Internal server error\"}");
         } finally {
             rwLock.readLock().unlock();
         }
@@ -228,18 +170,11 @@ public class AggregationServer {
     private void sendResponse(BufferedWriter wr, int statusCode, String statusMessage, String body) {
         int clockValue;
         synchronized (clock) {
-            clock.increment();              // increment once per response
-            clockValue = clock.getValue();  // snapshot
-            logger.info("Sending response, update clock value: " + clockValue);
+            clock.increment();
+            clockValue = clock.getValue();
         }
-
         try {
-            wr.write("HTTP/1.1 " + statusCode + " " + statusMessage + "\r\n");
-            wr.write("Content-Type: application/json\r\n");
-            wr.write("Clock: " + clockValue + "\r\n");
-            wr.write("\r\n");
-            if (body != null) wr.write(body);
-            wr.flush();
+            new HttpResponse(statusCode, statusMessage, body, clockValue).write(wr);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error sending response", e);
         }
