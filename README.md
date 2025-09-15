@@ -6,6 +6,7 @@ from multiple content servers can send PUT requests to the aggregation server an
 to multiple GET clients.
 
 ## Project layout (Please ensure the layout is matched for Makefile to work): 
+```bash
 Distributed_Systems/
 ├── lib/                                # External libraries
 │   ├── gson-2.13.2.jar                 # Gson (JSON parsing)
@@ -30,6 +31,7 @@ Distributed_Systems/
 ├── out/                                # Compiled class files (created by make)
 ├── Makefile                            # Build, test, run automation
 └── README.md                           # Documentation
+```
 
 ## How it works:
 ### Content Server:
