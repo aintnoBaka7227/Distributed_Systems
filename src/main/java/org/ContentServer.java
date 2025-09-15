@@ -10,30 +10,38 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.*;
 
-/*
- * Content Server:
- * Read station data from a text file
- * Upload the data to the Aggregation Server through HTTP PUT
- * Each request is sent with a Lamport Clock value
- * Fault Tolerance: resend based on response status
+/**
+ * ContentServer:
+ *  Reads weather station data from a text file.
+ *  Periodically uploads the data to the Aggregation Server via HTTP PUT.
+ *  Each PUT carries a Lamport clock value.
+ *  Retries requests on failure (with exponential backoff).
+ *
+ * Usage:
+ *   java ContentServer -url <server url> -f <station data file>
  */
 public class ContentServer {
 
     private static final Logger logger = Logger.getLogger(ContentServer.class.getName());
 
-    private final String FILE_PATH;
-    private final String SERVER_URL;
-    private final LamportClock clock;
-    private final Gson gson;
+    private final String FILE_PATH;   // path to an input file with station data
+    private final String SERVER_URL;  // aggregation server base URL
+    private final LamportClock clock; // local Lamport clock
+    private final Gson gson;          // JSON serializer
 
-    ContentServer(String filePath, String serverUrl) {
+    public ContentServer(String filePath, String serverUrl) {
         this.FILE_PATH = filePath;
         this.SERVER_URL = serverUrl;
         this.clock = new LamportClock();
         this.gson = new Gson();
     }
 
-    private java.util.List<JsonObject> readStationData() throws IOException {
+    /**
+     * Read the station data file into a list of JSON objects.
+     * A blank line separates each record in the file.
+     * @return list of station JSON records
+     */
+    java.util.List<JsonObject> readStationData() throws IOException {
         java.util.List<JsonObject> records = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
@@ -44,11 +52,13 @@ public class ContentServer {
                 line = line.trim();
 
                 if (line.isEmpty()) {
+                    // End of one record
                     if (!current.isEmpty()) {
                         records.add(current);
                         current = new JsonObject();
                     }
                 } else {
+                    // Parse "key: value" lines
                     String[] stationData = line.split(":", 2);
                     if (stationData.length == 2) {
                         current.addProperty(stationData[0].trim(), stationData[1].trim());
@@ -56,7 +66,7 @@ public class ContentServer {
                 }
             }
 
-            // Add last record if file doesn’t end with blank line
+            // Add the last record if a file doesn’t end with a blank line
             if (!current.isEmpty()) {
                 records.add(current);
             }
@@ -66,6 +76,9 @@ public class ContentServer {
         return records;
     }
 
+    /**
+     * Main loop: continuously read a station file and send PUTs.
+     */
     private void startRunning() {
         while (true) {
             try {
@@ -77,7 +90,7 @@ public class ContentServer {
                         continue;
                     }
 
-                    clock.increment();
+                    clock.increment(); // local event: preparing PUT
                     boolean isSuccess = sendPUTRobustly(record);
 
                     if (isSuccess) {
@@ -89,7 +102,7 @@ public class ContentServer {
                     Thread.sleep(3000); // space out PUTs
                 }
 
-                Thread.sleep(5000); // wait before re-reading file again
+                Thread.sleep(5000); // wait before re-reading a file again
 
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Unexpected ContentServer error", e);
@@ -97,7 +110,13 @@ public class ContentServer {
         }
     }
 
-    private boolean sendPUTRobustly(JsonObject json) {
+    /**
+     * PUT with retry logic (max 3 attempts, exponential backoff: 1,2,4...).
+     * Retry after a timeout of 5s.
+     * @param json station JSON record to PUT
+     * @return true if success, false if failed after retries
+     */
+    boolean sendPUTRobustly(JsonObject json) {
         int maxRetries = 3;
         int baseDelay = 1000;
 
@@ -126,6 +145,7 @@ public class ContentServer {
                         ": network error → " + e.getMessage());
             }
 
+            // exponential backoff
             int delay = baseDelay * (int) Math.pow(2, attempt - 1);
             logger.info("Retrying record id=" + json.get("id") + " after " + delay + "ms");
             try {
@@ -137,9 +157,12 @@ public class ContentServer {
         return false;
     }
 
+    /**
+     * Send one PUT request to the Aggregation Server.
+     */
     private HttpResponse sendPUT(JsonObject json) throws IOException {
         URI uri = URI.create(SERVER_URL);
-        String host = uri.getHost();
+        String host = uri.getHost() != null ? uri.getHost() : SERVER_URL.split(":")[0];
         int port = (uri.getPort() == -1) ? 4567 : uri.getPort();
         String body = gson.toJson(json);
         String endpoint = "/weather.json";
@@ -165,13 +188,16 @@ public class ContentServer {
                 // Parse response
                 HttpResponse resp = HttpResponse.parse(rd);
                 if (resp != null && resp.getClock() >= 0) {
-                    clock.update(resp.getClock());
+                    clock.update(resp.getClock()); // merge Lamport clock
                 }
                 return resp;
             }
         }
     }
 
+    /**
+     * Ensure the URL always has "http://".
+     */
     private static String handleURL(String url) {
         if (!url.startsWith("http://")) {
             return "http://" + url;
@@ -179,8 +205,14 @@ public class ContentServer {
         return url;
     }
 
+    /**
+     * Entry point.
+     * Expected arguments:
+     * url <server url>
+     * f <station data file>
+     */
     public static void main(String[] args) {
-        // Configure logger
+        // Configure logger to print to console
         Logger rootLogger = Logger.getLogger("");
         for (Handler h : rootLogger.getHandlers()) {
             rootLogger.removeHandler(h);
@@ -194,6 +226,7 @@ public class ContentServer {
         String url = null;
         String filePath = null;
 
+        // Parse command-line args
         for (int i = 0; i < args.length; i++) {
             if ("-url".equals(args[i])) {
                 url = args[++i];
@@ -208,6 +241,7 @@ public class ContentServer {
 
         url = handleURL(url);
 
+        // Start the content server
         ContentServer server = new ContentServer(filePath, url);
         server.startRunning();
     }

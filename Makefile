@@ -1,13 +1,14 @@
-# Makefile for assignment 1
-
+# Makefile for Distributed Systems Assignment 2: Must run on linux
+#
 # Purpose:
-# Compile application sources from src/main/java into ./out
-# Compile test sources from src/test/java and run them with JUnit 5
-# Targets to run server and client for manual terminal interface testing
-
+# - Compile application sources from src/main/java into ./out
+# - Compile test sources from src/test/java and run them with JUnit 5
+# - Targets to run server, content server, and client for manual terminal testing
+#
 # Notes:
-# This Makefile assumes a JDK (21+) is installed and 'javac'/'java' are on PATH.
-# Unit Console Standalone JAR (1.10.0) is expected at lib/junit-platform-console-standalone-*.jar.
+# - Requires JDK (21+) with 'javac'/'java' on PATH.
+# - Gson JAR expected at lib/gson-*.jar
+# - JUnit Console Standalone JAR expected at lib/junit-platform-console-standalone*.jar
 
 JAVAC := javac
 JAVA  := java
@@ -16,67 +17,87 @@ OUT := out
 SRC_MAIN := src/main/java
 SRC_TEST := src/test/java
 
-# Detect the junit console jar and remove blank space in the path
+# Detect jars
 JUNIT_JAR := $(strip $(firstword $(wildcard lib/junit-platform-console-standalone*.jar)))
+GSON_JAR  := $(strip $(firstword $(wildcard lib/gson-*.jar)))
 
-# Build classpath to run client - server (main java implementation files)
-CP_APP := $(strip $(OUT))
-# Build classpath to compile test files using compiled main files and junit jar
-CP_TEST := $(strip $(OUT):$(JUNIT_JAR))
+# Build classpaths
+CP_APP  := $(OUT):$(GSON_JAR)
+CP_TEST := $(OUT):$(JUNIT_JAR):$(GSON_JAR)
 
-.PHONY: all app tests run-server run-client test clean
+.PHONY: all app tests run-server run-content run-client run-content1 run-content2 run-client1 run-client2 test clean
 
-# Default target: build and run tests
+# Default target: run all tests
 all: tests
 
-# Compile application main files only
+# --- Compile application main files ---
 app: clean
 	@echo "Compiling main java files from $(SRC_MAIN) -> $(OUT)"
 	mkdir -p $(OUT)
-	# End each input file name with null character to ensure name correctness
-	find $(SRC_MAIN) -name '*.java' -print0 | xargs -0 $(JAVAC) -d $(OUT)
+	find $(SRC_MAIN) -name '*.java' -print0 | xargs -0 $(JAVAC) -cp "$(GSON_JAR)" -d $(OUT)
 
-# Compile app files + tests, then run all tests
+# --- Compile tests + run them ---
 all-tests: clean app
 	@echo "Using junit jar: $(JUNIT_JAR)"
 	@echo "Compiling test files with $(CP_TEST)"
-	find $(SRC_TEST) -name '*.java' -print0 | xargs -0 javac -cp "$(CP_TEST)" -d $(OUT)
+	find $(SRC_TEST) -name '*.java' -print0 | xargs -0 $(JAVAC) -cp "$(CP_TEST)" -d $(OUT)
 	@echo "Running tests..."
-	$(JAVA) -jar "$(JUNIT_JAR)" -cp "$(OUT)" --scan-classpath
+	$(JAVA) -jar "$(JUNIT_JAR)" -cp "$(CP_TEST)" --scan-class-path
 
-# compile test by name
+# compile specific test by name: make run-test TEST=org.UnitTestings.HttpRequestTest
 compile-test: app
 	@echo "Compiling test: $(TEST)"
 	$(JAVAC) -cp "$(CP_TEST)" -d "$(OUT)" "$(SRC_TEST)/$(subst .,/,$(TEST)).java"
 
-# Run individual test files
 run-test: compile-test
 	@echo "Running test class: $(TEST)"
-	$(JAVA) -jar "$(JUNIT_JAR)" -cp "$(OUT)" --select-class="$(TEST)"
+	$(JAVA) -jar "$(JUNIT_JAR)" -cp "$(CP_TEST)" --select-class="$(TEST)"
 
-# List of test files available
+# List all test classes
 list-tests:
-	@echo "Displayed test classes under $(SRC_TEST):"
+	@echo "Available test classes:"
 	@find "$(SRC_TEST)" -name '*Test.java' \
 	  | sed -e 's#^$(SRC_TEST)/##' -e 's#/#.#g' -e 's#\.java$$##'
 
-# Run the server
-server: app
-	@echo "Starting server..."
-	$(JAVA) -cp "$(CP_APP)" org.example.CalculatorServer
+# --- Run programs (hardcoded convenience) ---
+run-server: app
+	@echo "Starting Aggregation Server..."
+	$(JAVA) -cp "$(CP_APP)" org.AggregationServer -p 4567
 
-# Run the client
-client: app
-	@echo "Starting client..."
-	$(JAVA) -cp "$(CP_APP)" org.example.CalculatorClient
+run-content1: app
+	@echo "Starting ContentServer with station1..."
+	$(JAVA) -cp "$(CP_APP)" org.ContentServer -url http://localhost:4567 -f $(SRC_MAIN)/org/test/station1
 
-# Alias
+run-content2: app
+	@echo "Starting ContentServer with station2..."
+	$(JAVA) -cp "$(CP_APP)" org.ContentServer -url http://localhost:4567 -f $(SRC_MAIN)/org/test/station2
+
+run-client1: app
+	@echo "Starting GETClient for IDS60901..."
+	$(JAVA) -cp "$(CP_APP)" org.GETClient -url http://localhost:4567 -sid IDS60901
+
+run-client2: app
+	@echo "Starting GETClient (all stations)..."
+	$(JAVA) -cp "$(CP_APP)" org.GETClient -url http://localhost:4567
+
+# --- Run programs (flexible, allow ARGS=...) ---
+run-server-flex: app
+	@echo "Running AggregationServer with args: $(ARGS)"
+	$(JAVA) -cp "$(CP_APP)" org.AggregationServer $(ARGS)
+
+run-content: app
+	@echo "Running ContentServer with args: $(ARGS)"
+	$(JAVA) -cp "$(CP_APP)" org.ContentServer $(ARGS)
+
+run-client: app
+	@echo "Running GETClient with args: $(ARGS)"
+	$(JAVA) -cp "$(CP_APP)" org.GETClient $(ARGS)
+
+# --- Aliases ---
 test: run-test
 tests: all-tests
-run-server: server
-run-client: client
 
-# Clean compiled output
+# --- Clean ---
 clean:
 	@echo "Cleaning output directory..."
 	rm -rf "$(OUT)"

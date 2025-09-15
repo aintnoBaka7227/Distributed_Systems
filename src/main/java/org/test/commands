@@ -2,10 +2,18 @@ compile ContentServer:
 javac -cp "lib/gson-2.13.2.jar" src/main/java/org/ContentServer.java src/main/java/org/LamportClock.java src/main/java/org/HttpRequest.java src/main/java/org/HttpResponse.java -d out
 java -cp "lib/gson-2.13.2.jar;out" org.ContentServer -url http://localhost:4567 -f src/main/java/org/test/station1
 
+javac -cp "lib/gson-2.13.2.jar" src/main/java/org/ContentServer.java src/main/java/org/LamportClock.java src/main/java/org/HttpRequest.java src/main/java/org/HttpResponse.java -d out
+java -cp "lib/gson-2.13.2.jar;out" org.ContentServer -url http://localhost:4567 -f src/main/java/org/test/station2
+
 compile GETClient:
 javac -cp "lib/gson-2.13.2.jar" src/main/java/org/GETClient.java src/main/java/org/LamportClock.java src/main/java/org/HttpRequest.java src/main/java/org/HttpResponse.java -d out
 java -cp "lib/gson-2.13.2.jar;out" org.GETClient -url http://localhost:4567 -sid IDS60901
 
+javac -cp "lib/gson-2.13.2.jar" src/main/java/org/GETClient.java src/main/java/org/LamportClock.java src/main/java/org/HttpRequest.java src/main/java/org/HttpResponse.java -d out
+java -cp "lib/gson-2.13.2.jar;out" org.GETClient -url http://localhost:4567 -sid
+
 compile Aggregation Server:
 javac -cp "lib/gson-2.13.2.jar" src/main/java/org/AggregationServer.java src/main/java/org/LamportClock.java src/main/java/org/StationData.java src/main/java/org/PersistenceManager.java src/main/java/org/HttpRequest.java src/main/java/org/HttpResponse.java -d out
 java -cp "lib/gson-2.13.2.jar;out" org.AggregationServer -p
+
+compile Unit testings:
