@@ -8,6 +8,17 @@ import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * ServerClientIntegrationTest
+ * Integration-level tests:
+ * Spins up a real AggregationServer instance on a free port.
+ * Uses ContentServer to PUT weather station data into the server.
+ * Uses GETClient to GET data from the server.
+ * Verifies persistence and recovery from disk after restart.
+ * These tests ensure that the three main components AggregationServer,
+ * ContentServer, and GETClient can communicate correctly.
+ */
+
 class ServerClientIntegrationTest {
 
     private static ExecutorService serverExecutor;

@@ -9,6 +9,17 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * PersistenceManagerTest
+ * Unit tests for PersistenceManager to ensure safe saving and loading
+ * of station data with atomic writes:
+ * Ensures valid JSON is saved and restored correctly
+ * Handles missing files by return empty map
+ * Handles malformed JSON safely
+ * Overwrites previous data properly
+ * Uses a temporary file to guarantee atomic persistence
+ */
+
 class PersistenceManagerTest {
 
     private File mainFile;

@@ -16,9 +16,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * Creating a mock class with fake sendPUT and sendGetAll methods to test
- * Concurrent GETs and stale PUTs
+/**
+ * ConcurrencyGETsAndStalePUTsTest
+ * Integration tests for concurrency handling and Lamport clock behavior
+ * in the AggregationServer.
+ * Covers:
+ * Multiple GET requests are issued concurrently while a PUT is happening
+ * with no torn reads.
+ * Rejection of stale PUTs (Lamport clock too old).
+ * These tests use raw sockets to simulate real clients, not using real classes.
  */
 
 class ConcurrencyGETsAndStalePUTsTest {

@@ -10,7 +10,13 @@ import java.util.concurrent.CountDownLatch;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive tests for LamportClock
+ * LamportClockTest
+ * Unit tests for the LamportClock class, ensuring it behaves correctly
+ * Starts at 0
+ * Increments properly
+ * Updates correctly based on incoming values
+ * Handles multiple concurrent increments/updates (no synchronization in implementation,
+ * but test checks progression of clock value)
  */
 public class LamportClockTest {
 

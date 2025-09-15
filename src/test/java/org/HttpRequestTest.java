@@ -8,6 +8,17 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * HttpRequestTest
+ * Unit tests for the HttpRequest class.
+ * Scenarios tested:
+ * Parsing requests
+ * Writing requests
+ * Handling malformed or invalid request lines
+ * Handling malformed Content-Length and Clock headers
+ * Edge cases:empty body, truncated input
+ */
+
 class HttpRequestTest {
 
     // Test cases for parsing a simple GET request

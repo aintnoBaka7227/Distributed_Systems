@@ -12,9 +12,14 @@ import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
- * Creating a mock class with fake sendPUT and sendGetAll methods to test
- * Max Capacity and Expiry
+/**
+ * ServerCapacityAndExpiryTest
+ * Integration tests for AggregationServer capacity and expiry policies:
+ * Ensures the server enforces the 20-station capacity limit
+ * Keeps deleting the oldest station when capacity goes back to 20.
+ * Ensures stations expire and are removed if no updates are received within 30 seconds.
+ * This test simulates HTTP requests directly over sockets with
+ * custom PUT and GET methods, without relying on ContentServer/GETClient.
  */
 
 class ServerCapacityAndExpiryTest {

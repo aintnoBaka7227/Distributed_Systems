@@ -6,6 +6,18 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * HttpResponseTest
+ * Unit tests for the HttpResponse class.
+ * Covers writing responses to output streams and parsing responses from input streams.
+ * Test cases:
+ * Writing a response
+ * Parsing a valid response
+ * Fallback parsing when Content-Length is missing
+ * Error handling for invalid/malformed responses
+ * Edge cases: malformed Content-Length, malformed Clock, truncated body
+ */
+
 class HttpResponseTest {
 
     // Test case for writing a response with a body

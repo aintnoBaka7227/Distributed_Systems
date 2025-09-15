@@ -10,6 +10,17 @@ import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * AggregationStatusTest
+ * End-to-end tests verifying that AggregationServer returns the
+ * correct HTTP status codes for various GET and PUT scenarios.
+ * Covers:
+ *  First insert (201), updates (200), empty body (204),
+ *  invalid JSON (500), missing ID or invalid HTTP method (400), stale PUT (409).
+ *  GET existing station (200), GET non-existent station (404),
+ *  GET all when empty (204/200)
+ */
+
 class AggregationStatusTest {
 
     private static ExecutorService testServerExecutor;
