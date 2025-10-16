@@ -102,7 +102,7 @@ public class ContentServer {
                     Thread.sleep(3000); // space out PUTs
                 }
 
-                Thread.sleep(5000); // wait before re-reading a file again
+                Thread.sleep(30000); // wait before re-reading a file again
 
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Unexpected ContentServer error", e);
@@ -167,7 +167,8 @@ public class ContentServer {
         String body = gson.toJson(json);
         String endpoint = "/weather.json";
 
-        logger.info("Sending PUT to " + host + ":" + port + endpoint +
+        logger.info("Sending PUT with Clock=" + clock.getValue() +
+                " to " + host + ":" + port + endpoint +
                 " with body: " + body);
 
         try (Socket socket = new Socket()) {
