@@ -1,0 +1,3 @@
+Server error: Address already in use
+[2025-10-19T01:11:56.045] [INFO] [M9] [main] Listening on localhost:9009 profile=reliable
+Type 'help' for commands.
