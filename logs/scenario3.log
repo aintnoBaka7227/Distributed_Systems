@@ -1,0 +1,143 @@
+Scenario 3: Fault-Tolerance
+[S3a] Starting members...
+Starting M1 (reliable)
+5365
+Starting M2 (latent)
+5367
+Starting M3 (failure)
+5370
+Starting M4 (standard)
+5373
+Starting M5 (standard)
+5376
+Starting M6 (standard)
+5387
+Starting M7 (standard)
+5396
+Starting M8 (standard)
+5410
+Starting M9 (standard)
+5418
+[S3a] Proposing: M4 -> M5
+[S3a] Waiting for consensus...
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 1 / 9
+[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 1 / 9
+[wait] missing: M2 M3 M6 M7 M8 M9
+[wait] consensus lines seen: 7 / 9
+[wait] missing: M2
+[wait] consensus lines seen: 9 / 9
+[S3a] Consensus achieved in 6s
+[S3b] Restarting members...
+Starting M1 (reliable)
+6155
+Starting M2 (latent)
+6157
+Starting M3 (failure)
+6159
+Starting M4 (standard)
+6163
+Starting M5 (standard)
+6176
+Starting M6 (standard)
+6179
+Starting M7 (standard)
+6187
+Starting M8 (standard)
+6196
+Starting M9 (standard)
+6206
+[S3b] Proposing: M2 -> M2
+[S3b] Waiting for consensus...
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 1 / 9
+[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 2 / 9
+[wait] missing: M2 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 4 / 9
+[wait] missing: M2 M6 M7 M8 M9
+[wait] consensus lines seen: 8 / 9
+[wait] missing: M2
+[wait] consensus lines seen: 9 / 9
+[S3b] Consensus achieved in 10s
+kill: (5365): No such process
+kill: (5367): No such process
+kill: (5370): No such process
+kill: (5373): No such process
+kill: (5376): No such process
+kill: (5387): No such process
+kill: (5396): No such process
+kill: (5410): No such process
+kill: (5418): No such process
+[S3c] Restarting members...
+Starting M1 (reliable)
+7053
+Starting M2 (latent)
+7055
+Starting M3 (failure)
+7058
+Starting M4 (standard)
+7061
+Starting M5 (standard)
+7069
+Starting M6 (standard)
+7075
+Starting M7 (standard)
+7086
+Starting M8 (standard)
+7105
+Starting M9 (standard)
+7115
+[S3c] Proposing: M3 -> M3
+[S3c] Crashing M3
+[S3c] Proposing: M4 -> M7
+[S3c] Waiting for consensus (8 learners expected)...
+[wait] consensus lines seen: 0 / 8
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 8
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 8
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 1 / 8
+[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 6 / 8
+[wait] missing: M2 M3 M9
+[wait] consensus lines seen: 7 / 8
+[wait] missing: M2 M3
+[wait] consensus lines seen: 7 / 8
+[wait] missing: M2 M3
+[wait] consensus lines seen: 7 / 8
+[wait] missing: M2 M3
+[wait] consensus lines seen: 8 / 8
+[wait] missing: M3
+[S3c] Consensus achieved in 10s
+kill: (5365): No such process
+kill: (5367): No such process
+kill: (5370): No such process
+kill: (5373): No such process
+kill: (5376): No such process
+kill: (5387): No such process
+kill: (5396): No such process
+kill: (5410): No such process
+kill: (5418): No such process
+kill: (6155): No such process
+kill: (6157): No such process
+kill: (6159): No such process
+kill: (6163): No such process
+kill: (6176): No such process
+kill: (6179): No such process
+kill: (6187): No such process
+kill: (6196): No such process
+kill: (6206): No such process
+kill: (7058): No such process

@@ -2,8 +2,7 @@ Scenario 1: Ideal Network
 [S1] Starting members...
 [S1] Proposing: M4 -> M5
 [S1] Waiting for consensus...
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M4 M5
+[wait] consensus lines seen: 1 / 9
 [wait] consensus lines seen: 9 / 9
 [S1] Consensus achieved in 1s
 [S1] Stopping members

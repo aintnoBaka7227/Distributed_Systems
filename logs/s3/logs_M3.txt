@@ -1,0 +1,30 @@
+[2025-10-19T01:51:29.304] [INFO] [M3] [Server-M3] Server bound on port 9003
+[2025-10-19T01:51:29.318] [INFO] [M3] [main] Listening on localhost:9003 profile=failure
+Type 'help' for commands.
+[2025-10-19T01:51:29.687] [ADMIN] [M3] [Conn-/127.0.0.1:40844] help
+[2025-10-19T01:51:30.041] [ADMIN] [M3] [Conn-/127.0.0.1:40854] propose M3
+[2025-10-19T01:51:30.043] [INFO] [M3] [Conn-/127.0.0.1:40854] M3 starting PREPARE n=103 v=M3
+[2025-10-19T01:51:30.382] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M1 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:30.526] [PROTO] [M3] [Conn-/127.0.0.1:40864] RECV from=M1 type=PROMISE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:30.539] [INFO] [M3] [Conn-/127.0.0.1:40864] M3 PROMISES count=1/9 maj=5 for n=103
+[2025-10-19T01:51:30.873] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M2 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:31.282] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M3 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:31.435] [PROTO] [M3] [Conn-/127.0.0.1:40880] RECV from=M3 type=PREPARE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:31.443] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M4 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:31.589] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M6 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:31.877] [PROTO] [M3] [Conn-/127.0.0.1:40880] SEND to=M3 type=PROMISE pid=103 val=null
+[2025-10-19T01:51:32.087] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M8 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:32.188] [PROTO] [M3] [Conn-/127.0.0.1:40906] RECV from=M3 type=PROMISE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:32.189] [INFO] [M3] [Conn-/127.0.0.1:40906] M3 PROMISES count=2/9 maj=5 for n=103
+[2025-10-19T01:51:32.203] [PROTO] [M3] [Conn-/127.0.0.1:40854] SEND to=M9 type=PREPARE pid=103 val=null
+[2025-10-19T01:51:32.234] [PROTO] [M3] [Conn-/127.0.0.1:40910] RECV from=M6 type=PROMISE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:32.235] [INFO] [M3] [Conn-/127.0.0.1:40910] M3 PROMISES count=3/9 maj=5 for n=103
+[2025-10-19T01:51:32.440] [PROTO] [M3] [Conn-/127.0.0.1:40890] RECV from=M4 type=PROMISE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:32.441] [INFO] [M3] [Conn-/127.0.0.1:40890] M3 PROMISES count=4/9 maj=5 for n=103
+[2025-10-19T01:51:32.829] [PROTO] [M3] [Conn-/127.0.0.1:40922] RECV from=M9 type=PROMISE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:32.830] [INFO] [M3] [Conn-/127.0.0.1:40922] M3 PROMISES count=5/9 maj=5 for n=103
+[2025-10-19T01:51:32.831] [INFO] [M3] [Conn-/127.0.0.1:40922] M3 sending ACCEPT_REQUEST n=103 v=M3
+[2025-10-19T01:51:33.092] [PROTO] [M3] [Conn-/127.0.0.1:43240] RECV from=M8 type=PROMISE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:33.407] [PROTO] [M3] [Conn-/127.0.0.1:40922] SEND to=M1 type=ACCEPT_REQUEST pid=103 val=M3
+[2025-10-19T01:51:33.773] [ADMIN] [M3] [Conn-/127.0.0.1:43254] crash
+Crashing by request via TCP...

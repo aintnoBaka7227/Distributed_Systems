@@ -1,0 +1,21 @@
+[2025-10-19T01:51:00.731] [INFO] [M7] [Server-M7] Server bound on port 9007
+[2025-10-19T01:51:00.736] [INFO] [M7] [main] Listening on localhost:9007 profile=standard
+Type 'help' for commands.
+[2025-10-19T01:51:01.487] [ADMIN] [M7] [Conn-/127.0.0.1:53358] help
+[2025-10-19T01:51:02.951] [PROTO] [M7] [Conn-/127.0.0.1:49856] RECV from=M4 type=PREPARE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:03.234] [PROTO] [M7] [Conn-/127.0.0.1:49856] SEND to=M4 type=PROMISE pid=104 val=null
+[2025-10-19T01:51:04.135] [PROTO] [M7] [Conn-/127.0.0.1:49862] RECV from=M1 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:04.144] [INFO] [M7] [Conn-/127.0.0.1:49862] M7 LEARN count=1/5 for n=104 v=M5
+[2025-10-19T01:51:06.338] [PROTO] [M7] [Conn-/127.0.0.1:49882] RECV from=M4 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:06.341] [INFO] [M7] [Conn-/127.0.0.1:49882] M7 LEARN count=2/5 for n=104 v=M5
+[2025-10-19T01:51:06.693] [PROTO] [M7] [Conn-/127.0.0.1:49910] RECV from=M3 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:06.695] [INFO] [M7] [Conn-/127.0.0.1:49910] M7 LEARN count=3/5 for n=104 v=M5
+[2025-10-19T01:51:06.788] [PROTO] [M7] [Conn-/127.0.0.1:49898] RECV from=M5 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:06.789] [INFO] [M7] [Conn-/127.0.0.1:49898] M7 LEARN count=4/5 for n=104 v=M5
+[2025-10-19T01:51:06.875] [PROTO] [M7] [Conn-/127.0.0.1:49902] RECV from=M6 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:06.876] [INFO] [M7] [Conn-/127.0.0.1:49902] M7 LEARN count=5/5 for n=104 v=M5
+[2025-10-19T01:51:06.877] [DECIDE] [M7] [Conn-/127.0.0.1:49902] Consensus reached: M5
+CONSENSUS: M5 has been elected Council President!
+[2025-10-19T01:51:06.885] [PROTO] [M7] [Conn-/127.0.0.1:49926] RECV from=M8 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:07.571] [PROTO] [M7] [Conn-/127.0.0.1:49942] RECV from=M9 type=ACCEPTED pid=104 val=M5 accId=null accVal=null
+[2025-10-19T01:51:08.015] [PROTO] [M7] [Conn-/127.0.0.1:49944] RECV from=M2 type=ACCEPTED pid=104 val=M5 accId=null accVal=null

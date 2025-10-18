@@ -1,6 +1,17 @@
 package org;
 
 /**
+ * Message types used in Paxos protocol.
+ * Kept package-private and colocated with Message for simplicity.
+ */
+enum MessageType {
+    PREPARE,
+    PROMISE,
+    ACCEPT_REQUEST,
+    ACCEPTED
+}
+
+/**
  * Simple text-based message with key fields for Paxos.
  * Encoded as pipe-delimited: TYPE|from|proposalId|value|accId|accVal
  */

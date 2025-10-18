@@ -17,6 +17,12 @@ fi
 
 kill_bg() {
   jobs -p | xargs -r kill || true
+  # Fallback: kill any lingering CouncilMember processes
+  if command -v pkill >/dev/null 2>&1; then
+    pkill -f "org.CouncilMember" || true
+  fi
+  # Give the OS a moment to release ports
+  sleep 1
 }
 trap kill_bg EXIT
 
@@ -74,7 +80,7 @@ scenario1() {
   done
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
   # Trigger proposal: M4 proposes M5
-  echo "[S1] Proposing: M4 -> M5"; java -cp out org.AdminClient localhost 9004 "propose M5" || true
+  echo "[S1] Proposing: M4 -> M5"; send_cmd 9004 propose M5
   echo "[S1] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S1" S1 || true
   echo "[S1] Stopping members"
@@ -90,9 +96,9 @@ scenario2() {
   done
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
   # Concurrent proposals from M1 and M8
-  echo "[S2] Proposing concurrently: M1 -> M1, M8 -> M8"; java -cp out org.AdminClient localhost 9001 "propose M1" || true
+  echo "[S2] Proposing concurrently: M1 -> M1, M8 -> M8"; send_cmd 9001 propose M1
   sleep 0.5
-  java -cp out org.AdminClient localhost 9008 "propose M8" || true
+  send_cmd 9008 propose M8
   echo "[S2] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S2" S2 || true
   echo "[S2] Stopping members"
@@ -113,10 +119,12 @@ scenario3() {
   start_member M9 standard
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
   # 3a: M4 proposes M5
-  echo "[S3a] Proposing: M4 -> M5"; java -cp out org.AdminClient localhost 9004 "propose M5" || true
+  echo "[S3a] Proposing: M4 -> M5"; send_cmd 9004 propose M5
   echo "[S3a] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S3A" S3a || true
   kill_bg
+  save_member_logs s3a
+  clear_member_logs
 
   # Relaunch for 3b
   echo "[S3b] Restarting members..."
@@ -130,10 +138,12 @@ scenario3() {
   start_member M8 standard
   start_member M9 standard
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
-  echo "[S3b] Proposing: M2 -> M2"; java -cp out org.AdminClient localhost 9002 "propose M2" || true
+  echo "[S3b] Proposing: M2 -> M2"; send_cmd 9002 propose M2
   echo "[S3b] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S3B" S3b || true
   kill_bg
+  save_member_logs s3b
+  clear_member_logs
 
   # Relaunch for 3c
   echo "[S3c] Restarting members..."
@@ -148,16 +158,17 @@ scenario3() {
   start_member M9 standard
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
   # M3 starts then crashes
-  echo "[S3c] Proposing: M3 -> M3"; java -cp out org.AdminClient localhost 9003 "propose M3" || true
+  echo "[S3c] Proposing: M3 -> M3"; send_cmd 9003 propose M3
   sleep 1
   # simulate crash by sending crash command
-  echo "[S3c] Crashing M3"; java -cp out org.AdminClient localhost 9003 "crash" || true
+  echo "[S3c] Crashing M3"; send_cmd 9003 crash
   # Another member drives to consensus
   sleep 1
-  echo "[S3c] Proposing: M4 -> M7"; java -cp out org.AdminClient localhost 9004 "propose M7" || true
+  echo "[S3c] Proposing: M4 -> M7"; send_cmd 9004 propose M7
   echo "[S3c] Waiting for consensus (8 learners expected)..."
   wait_and_time 8 "$TIMEOUT_S3C" S3c || true
   kill_bg
+  save_member_logs s3c
 }
 
 ensure_logs_dir
@@ -175,6 +186,19 @@ save_member_logs() {
   for f in logs/log_M*.txt; do cp "$f" "$dir/"; done
   for f in logs/logs_M*.txt; do cp "$f" "$dir/"; done
   shopt -u nullglob
+}
+
+# Send an admin command to a member (uses nc/ncat if present; falls back to AdminClient)
+send_cmd() {
+  local port=$1; shift
+  local cmdline="$*"
+  if command -v nc >/dev/null 2>&1; then
+    printf "%s\n" "$cmdline" | nc localhost "$port" >/dev/null 2>&1 || true
+  elif command -v ncat >/dev/null 2>&1; then
+    printf "%s\n" "$cmdline" | ncat localhost "$port" >/dev/null 2>&1 || true
+  else
+    java -cp out org.AdminClient localhost "$port" $cmdline >/dev/null 2>&1 || true
+  fi
 }
 
 # Helpers to wait for consensus lines in app logs

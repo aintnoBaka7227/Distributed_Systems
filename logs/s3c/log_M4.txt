@@ -1,0 +1,76 @@
+[2025-10-19T01:51:29.335] [INFO] [M4] [Server-M4] Server bound on port 9004
+[2025-10-19T01:51:29.342] [INFO] [M4] [main] Listening on localhost:9004 profile=standard
+[2025-10-19T01:51:29.918] [ADMIN] [M4] [Conn-/127.0.0.1:41278] help
+[2025-10-19T01:51:31.607] [PROTO] [M4] [Conn-/127.0.0.1:41286] RECV from=M3 type=PREPARE pid=103 val=null accId=null accVal=null
+[2025-10-19T01:51:31.871] [PROTO] [M4] [Conn-/127.0.0.1:41286] SEND to=M3 type=PROMISE pid=103 val=null
+[2025-10-19T01:51:33.525] [PROTO] [M4] [Conn-/127.0.0.1:47846] RECV from=M1 type=ACCEPTED pid=103 val=M3 accId=null accVal=null
+[2025-10-19T01:51:33.536] [INFO] [M4] [Conn-/127.0.0.1:47846] M4 LEARN count=1/5 for n=103 v=M3
+[2025-10-19T01:51:35.350] [ADMIN] [M4] [Conn-/127.0.0.1:47860] propose M7
+[2025-10-19T01:51:35.351] [INFO] [M4] [Conn-/127.0.0.1:47860] M4 starting PREPARE n=104 v=M7
+[2025-10-19T01:51:35.716] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M1 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:35.946] [PROTO] [M4] [Conn-/127.0.0.1:47874] RECV from=M1 type=PROMISE pid=104 val=null accId=103 accVal=M3
+[2025-10-19T01:51:35.955] [INFO] [M4] [Conn-/127.0.0.1:47874] M4 PROMISES count=1/9 maj=5 for n=104
+[2025-10-19T01:51:36.075] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M2 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:36.711] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M4 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:37.039] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M5 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:37.053] [PROTO] [M4] [Conn-/127.0.0.1:47878] RECV from=M4 type=PREPARE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:37.266] [PROTO] [M4] [Conn-/127.0.0.1:47878] SEND to=M4 type=PROMISE pid=104 val=null
+[2025-10-19T01:51:37.313] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M6 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:37.363] [PROTO] [M4] [Conn-/127.0.0.1:47894] RECV from=M4 type=PROMISE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:37.364] [INFO] [M4] [Conn-/127.0.0.1:47894] M4 PROMISES count=2/9 maj=5 for n=104
+[2025-10-19T01:51:37.435] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M7 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:37.499] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M8 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:37.633] [PROTO] [M4] [Conn-/127.0.0.1:47860] SEND to=M9 type=PREPARE pid=104 val=null
+[2025-10-19T01:51:37.806] [PROTO] [M4] [Conn-/127.0.0.1:47896] RECV from=M5 type=PROMISE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:37.809] [INFO] [M4] [Conn-/127.0.0.1:47896] M4 PROMISES count=3/9 maj=5 for n=104
+[2025-10-19T01:51:38.015] [PROTO] [M4] [Conn-/127.0.0.1:47898] RECV from=M2 type=PROMISE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:38.017] [INFO] [M4] [Conn-/127.0.0.1:47898] M4 PROMISES count=4/9 maj=5 for n=104
+[2025-10-19T01:51:38.246] [PROTO] [M4] [Conn-/127.0.0.1:47906] RECV from=M7 type=PROMISE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:38.247] [INFO] [M4] [Conn-/127.0.0.1:47906] M4 PROMISES count=5/9 maj=5 for n=104
+[2025-10-19T01:51:38.248] [INFO] [M4] [Conn-/127.0.0.1:47906] M4 sending ACCEPT_REQUEST n=104 v=M3
+[2025-10-19T01:51:38.377] [PROTO] [M4] [Conn-/127.0.0.1:47914] RECV from=M8 type=PROMISE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:38.406] [PROTO] [M4] [Conn-/127.0.0.1:47920] RECV from=M9 type=PROMISE pid=104 val=null accId=null accVal=null
+[2025-10-19T01:51:38.441] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M1 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:38.691] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M2 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:38.727] [PROTO] [M4] [Conn-/127.0.0.1:47922] RECV from=M1 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:39.119] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M4 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:39.185] [PROTO] [M4] [Conn-/127.0.0.1:47938] RECV from=M4 type=ACCEPT_REQUEST pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:39.403] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M5 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:39.421] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M1 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:39.572] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M2 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:39.726] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M5 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:39.739] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M6 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:39.794] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M6 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:39.963] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M7 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:40.003] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M7 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:40.201] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M8 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:40.273] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M8 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:40.333] [PROTO] [M4] [Conn-/127.0.0.1:47906] SEND to=M9 type=ACCEPT_REQUEST pid=104 val=M3
+[2025-10-19T01:51:40.550] [PROTO] [M4] [Conn-/127.0.0.1:47938] SEND to=M9 type=ACCEPTED pid=104 val=M3
+[2025-10-19T01:51:40.551] [INFO] [M4] [Conn-/127.0.0.1:47938] M4 LEARN count=1/5 for n=104 v=M3
+[2025-10-19T01:51:40.552] [INFO] [M4] [Conn-/127.0.0.1:47922] M4 LEARN count=2/5 for n=104 v=M3
+[2025-10-19T01:51:40.553] [INFO] [M4] [Conn-/127.0.0.1:47920] M4 PROMISES count=6/9 maj=5 for n=104
+[2025-10-19T01:51:40.553] [INFO] [M4] [Conn-/127.0.0.1:47914] M4 PROMISES count=7/9 maj=5 for n=104
+[2025-10-19T01:51:40.555] [WARN] [M4] [Watchdog-104] M4 retrying proposal due to timeout n=104
+[2025-10-19T01:51:40.556] [INFO] [M4] [Watchdog-104] M4 starting PREPARE n=204 v=M7
+[2025-10-19T01:51:40.650] [PROTO] [M4] [Conn-/127.0.0.1:47940] RECV from=M5 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:40.651] [INFO] [M4] [Conn-/127.0.0.1:47940] M4 LEARN count=3/5 for n=104 v=M3
+[2025-10-19T01:51:40.701] [PROTO] [M4] [Watchdog-104] SEND to=M1 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:40.946] [PROTO] [M4] [Watchdog-104] SEND to=M2 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:40.949] [PROTO] [M4] [Conn-/127.0.0.1:47956] RECV from=M7 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:40.950] [INFO] [M4] [Conn-/127.0.0.1:47956] M4 LEARN count=4/5 for n=104 v=M3
+[2025-10-19T01:51:41.326] [PROTO] [M4] [Conn-/127.0.0.1:47958] RECV from=M6 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:41.327] [INFO] [M4] [Conn-/127.0.0.1:47958] M4 LEARN count=5/5 for n=104 v=M3
+[2025-10-19T01:51:41.327] [DECIDE] [M4] [Conn-/127.0.0.1:47958] Consensus reached: M3
+[2025-10-19T01:51:41.604] [PROTO] [M4] [Watchdog-104] SEND to=M4 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:41.615] [PROTO] [M4] [Conn-/127.0.0.1:47966] RECV from=M9 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:41.691] [PROTO] [M4] [Conn-/127.0.0.1:47994] RECV from=M4 type=PREPARE pid=204 val=null accId=null accVal=null
+[2025-10-19T01:51:41.724] [PROTO] [M4] [Watchdog-104] SEND to=M5 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:41.844] [PROTO] [M4] [Conn-/127.0.0.1:47978] RECV from=M8 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:41.884] [PROTO] [M4] [Watchdog-104] SEND to=M6 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:42.226] [PROTO] [M4] [Watchdog-104] SEND to=M7 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:42.381] [PROTO] [M4] [Conn-/127.0.0.1:48006] RECV from=M6 type=PROMISE pid=204 val=null accId=104 accVal=M3
+[2025-10-19T01:51:42.412] [PROTO] [M4] [Watchdog-104] SEND to=M8 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:42.528] [PROTO] [M4] [Watchdog-104] SEND to=M9 type=PREPARE pid=204 val=null
+[2025-10-19T01:51:43.021] [PROTO] [M4] [Conn-/127.0.0.1:57358] RECV from=M2 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-19T01:51:46.558] [PROTO] [M4] [Conn-/127.0.0.1:57364] RECV from=M2 type=PROMISE pid=204 val=null accId=104 accVal=M3

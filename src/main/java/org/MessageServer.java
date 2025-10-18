@@ -3,6 +3,7 @@ package org;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -23,7 +24,28 @@ public class MessageServer implements Runnable {
 
     @Override
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        ServerSocket serverSocket = null;
+        // Retry binding to the port in case a previous process is still releasing it
+        for (int attempt = 0; attempt < 40 && running; attempt++) {
+            try {
+                serverSocket = new ServerSocket(port);
+                Logger.info("Server bound on port " + port);
+                break;
+            } catch (BindException be) {
+                if (attempt == 0) {
+                    System.err.println("Server bind error (in use), retrying: " + be.getMessage());
+                }
+                try { Thread.sleep(250); } catch (InterruptedException ignored) {}
+            } catch (IOException e) {
+                System.err.println("Server error while binding: " + e.getMessage());
+                return;
+            }
+        }
+        if (serverSocket == null) {
+            System.err.println("Server failed to bind on port " + port + " after retries.");
+            return;
+        }
+        try {
             while (running) {
                 Socket socket = serverSocket.accept();
                 Thread t = new Thread(() -> handle(socket), "Conn-" + socket.getRemoteSocketAddress());
@@ -34,6 +56,8 @@ public class MessageServer implements Runnable {
             if (running) {
                 System.err.println("Server error: " + e.getMessage());
             }
+        } finally {
+            try { serverSocket.close(); } catch (IOException ignored) {}
         }
     }
 
