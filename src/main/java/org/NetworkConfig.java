@@ -9,12 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// Package-private Endpoint co-located with NetworkConfig for simplicity
+/**
+ * Represents a single network participant's address and port.
+ * Used internally by NetworkConfig to define where each member runs.
+ * Example entry: M1@localhost:9001
+ */
 class Endpoint {
     public final String id;
     public final String host;
     public final int port;
 
+    /**
+     * Constructor for Endpoint.
+     * @param id   Member ID (e.g., "M1")
+     * @param host Hostname or IP address
+     * @param port TCP port number assigned 
+     */
     Endpoint(String id, String host, int port) {
         this.id = id;
         this.host = host;
@@ -28,10 +38,15 @@ class Endpoint {
 }
 
 /**
- * Loads and holds the network configuration mapping member IDs to host:port.
- * Format per line: M1,localhost,9001
+ * NetworkConfig:
+ * Loads and stores network information for all members.
+ * Each member ID maps to an Endpoint containing host and port details.
+ * Expected configuration file format:
+ *   M1,localhost,9001
+ *   ...
  */
 public class NetworkConfig {
+    // Maps member IDs to their Endpoint definitions
     private final Map<String, Endpoint> endpoints;
 
     private NetworkConfig(Map<String, Endpoint> endpoints) {
@@ -39,23 +54,33 @@ public class NetworkConfig {
     }
 
     /**
-     * Load configuration from a file path.
-     * @param path file path
-     * @return loaded config
-     * @throws IOException on read errors
+     * Loads a network configuration from a file on disk.
+     * Responsibilities:
+     * Ignore comments, empty lines.
+     * Parse member ID, host, and port.
+     * Build Endpoint objects and store in a map.
+     *
+     * @param path Path to configuration file (e.g., "network.config")
+     * @return NetworkConfig containing all parsed members
+     * @throws IOException If file cannot be read or parsed
      */
-    public static NetworkConfig load(String path) throws IOException {
+    public static NetworkConfig loadConfigFile(String path) throws IOException {
         Map<String, Endpoint> map = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
+                // Skip empty lines and comment lines starting with '#'
                 if (line.isEmpty() || line.startsWith("#")) continue;
+
+                // Split line into id, host, port
                 String[] parts = line.split(",");
                 if (parts.length < 3) continue;
+
                 String id = parts[0].trim();
                 String host = parts[1].trim();
                 int port = Integer.parseInt(parts[2].trim());
+
                 map.put(id, new Endpoint(id, host, port));
             }
         }
@@ -63,17 +88,17 @@ public class NetworkConfig {
     }
 
     /**
-     * Get endpoint by member ID.
-     * @param id member id
-     * @return endpoint or null
+     * Retrieves the endpoint linking to a member ID.
+     * @param id Member identifier (e.g., "M1")
+     * @return Endpoint object or null if not found
      */
     public Endpoint getEndpoint(String id) {
         return endpoints.get(id);
     }
 
     /**
-     * List all member IDs.
-     * @return unmodifiable list of IDs
+     * Returns a sorted list of all member IDs.
+     * @return Sorted unmodifiable list of member IDs
      */
     public List<String> getMemberIds() {
         List<String> ids = new ArrayList<>(endpoints.keySet());
@@ -82,8 +107,9 @@ public class NetworkConfig {
     }
 
     /**
-     * Get majority threshold for quorum (N/2 + 1)
-     * @return majority size
+     * Calculates the quorum for Paxos.
+     * floor(N/2) + 1
+     * @return Number of members required for majority
      */
     public int majority() {
         int n = endpoints.size();
@@ -91,12 +117,10 @@ public class NetworkConfig {
     }
 
     /**
-     * Get number of members.
-     * @return size
+     * Returns the total number of members in the configuration.
+     * @return Count of configured members
      */
     public int size() {
         return endpoints.size();
     }
 }
-
-

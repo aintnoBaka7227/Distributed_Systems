@@ -1,8 +1,8 @@
 package org;
 
 /**
- * Message types used in Paxos protocol.
- * Kept package-private and colocated with Message for simplicity.
+ * Message types used in Paxos protocol
+ * Kept package-private and colocated with Message for simplicity
  */
 enum MessageType {
     PREPARE,
@@ -12,19 +12,20 @@ enum MessageType {
 }
 
 /**
- * Simple text-based message with key fields for Paxos.
+ * Simple text-based message with key fields for Paxos
  * Encoded as colon-delimited: TYPE:senderID:proposalID:proposalVal:acceptedID:acceptedValue
  */
 public class Message {
     public MessageType type;
     public String senderID;
-    public Integer proposalID; // may be null in some control messages
-    public String proposalVal;    // candidate or decided value
-    public Integer acceptedID; // for PROMISE responses
-    public String acceptedValue; // for PROMISE responses
+    public Integer proposalID; 
+    public String proposalVal;  
+    public Integer acceptedID; 
+    public String acceptedValue; 
 
     public Message() {}
 
+    // PREPARE message
     public static Message prepare(String senderID, int proposalID) {
         Message m = new Message();
         m.type = MessageType.PREPARE;
@@ -33,6 +34,7 @@ public class Message {
         return m;
     }
 
+    // PROMISE message
     public static Message promise(String senderID, int proposalID, Integer acceptedId, String acceptedValue) {
         Message m = new Message();
         m.type = MessageType.PROMISE;
@@ -43,6 +45,7 @@ public class Message {
         return m;
     }
 
+    // ACCEPT_REQUEST message
     public static Message acceptRequest(String senderID, int proposalID, String proposalVal) {
         Message m = new Message();
         m.type = MessageType.ACCEPT_REQUEST;
@@ -52,6 +55,7 @@ public class Message {
         return m;
     }
 
+    // ACCEPTED message
     public static Message accepted(String senderID, int proposalID, String proposalVal) {
         Message m = new Message();
         m.type = MessageType.ACCEPTED;
@@ -60,8 +64,6 @@ public class Message {
         m.proposalVal = proposalVal;
         return m;
     }
-
-    // No DECIDE message in this variant; learners aggregate ACCEPTED quorum.
 
     /**
      * Encode to a single line for sending over TCP.

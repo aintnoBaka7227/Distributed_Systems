@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.List;
 
 /**
- * Simple TCP client utility for sending messages to peers.
+ * Simple TCP client utility for sending messages to peers
  */
 public class NetworkClient {
     private final NetworkConfig config;
@@ -20,7 +20,7 @@ public class NetworkClient {
     }
 
     /**
-     * Send message to a specific member by ID.
+     * Send message to a specific member by ID
      * @param toDestinationId destination member id
      * @param m message
      */
@@ -28,7 +28,8 @@ public class NetworkClient {
         Endpoint endpoint = config.getEndpoint(toDestinationId);
         if (endpoint == null) return;
         // simulate send-side profile
-        if (!profile.beforeNetworkAction()) return; // drop
+        // check rate for immediate drop 
+        if (!profile.beforeNetworkAction()) return; 
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(endpoint.host, endpoint.port), 1000);
             try (PrintWriter out = new PrintWriter(
@@ -42,7 +43,7 @@ public class NetworkClient {
     }
 
     /**
-     * Broadcast a message to all members except self if excludeSelf is true.
+     * Broadcast a message to all members except self if excludeSelf is true
      * @param selfId this member id
      * @param m message
      * @param excludeSelf whether to exclude self

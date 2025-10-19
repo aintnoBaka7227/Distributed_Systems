@@ -4,34 +4,115 @@ This project implements a single-decree Paxos consensus protocol over TCP socket
 
 ## Project Structure
 
-```
+Overal structure:
+
+``` bash
 Distributed_Systems/
-├── lib/                                 # External libraries (optional)
+├── .idea/                                # IDE metadata (optional)
+├── .vscode/                              # Editor settings (optional)
+├── lib/                                  # External libraries (optional)
 ├── src/
-│   └── main/java/org/                   # Java sources (package org)
-│       ├── CouncilMember.java
-│       ├── Endpoint.java
-│       ├── Message.java
-│       ├── MessageServer.java
-│       ├── MessageType.java
-│       ├── MemberProfile.java
-│       ├── NetworkClient.java
-│       ├── NetworkConfig.java
-│       └── PaxosNode.java
-├── out/                                  # Compiled classes (created by Makefile)
+│   ├── main/java/org/                   # Java sources (package org)
+│   │   ├── CouncilMember.java           # Process entrypoint and CLI/admin handling
+│   │   ├── PaxosNode.java               # Paxos roles coordination and shared state
+│   │   ├── Proposer.java                # Proposer role
+│   │   ├── Acceptor.java                # Acceptor role
+│   │   ├── Learner.java                 # Learner role
+│   │   ├── Message.java                 # Message model and codec
+│   │   ├── MessageServer.java           # TCP server for messages + admin
+│   │   ├── NetworkClient.java           # TCP client with profile simulation
+│   │   ├── NetworkConfig.java           # Cluster membership/ports loader
+│   │   ├── MemberProfile.java           # Latency/drop behavior definitions
+│   │   └── Logger.java                  # Simple logging utility
+│   └── test/java/org/                   # Unit and integration tests
+│       ├── AcceptorTest.java
+│       ├── LearnerTest.java
+│       ├── MemberProfileTest.java
+│       ├── MessageServerTest.java
+│       ├── MessageTest.java
+│       ├── NetworkClientTest.java
+│       ├── NetworkConfigTest.java
+│       ├── PaxosIntegrationTest.java
+│       └── ProposerTest.java
 ├── Makefile                              # Build, run, test automation
+├── pom.xml                               # Maven descriptor (optional build)
 ├── network.config                        # Member host:port mapping
-├── run_tests.sh                          # Example test harness
+├── run_tests.sh                          # Run all scenarios (bash)
+├── run_scenario.sh                       # Run a single scenario (bash)
+├── out/                                  # Compiled classes (generated)
+├── out_test/                             # Test or scratch outputs (generated)
+├── logs/                                 # Scenario/member logs (generated)
+├── target/                               # Maven build output (generated)
 └── README.md
 ```
 
-## Build
+## Logs Structure
 
-- Requires JDK 8+
-- Build classes into `out/`:
+The test runners write high-level scenario logs and archive per-member logs.
+
+``` bash
+logs/
+├── scenario1.log                      # Stdout/stderr for Scenario 1 run
+├── scenario2.log                      # Stdout/stderr for Scenario 2 run
+├── scenario3.log                      # Stdout/stderr for Scenario 3 (3a–3c)
+├── s1/                                # Archived per-member logs after Scenario 1
+│   ├── log_M1.txt
+│   ├── log_M2.txt
+│   ├── log_M3.txt
+│   ├── log_M4.txt
+│   ├── log_M5.txt
+│   ├── log_M6.txt
+│   ├── log_M7.txt
+│   ├── log_M8.txt
+│   └── log_M9.txt
+├── s2/                                # Archived per-member logs after Scenario 2
+│   ├── log_M1.txt
+│   └── ... log_M9.txt
+├── s3/                                # Archived per-member logs after Scenario 3 (final state)
+│   ├── log_M1.txt
+│   └── ... log_M9.txt
+├── s3a/                               # Subcase 3a archived per-member logs
+│   ├── log_M1.txt
+│   └── ... log_M9.txt
+├── s3b/                               # Subcase 3b archived per-member logs
+│   ├── log_M1.txt
+│   └── ... log_M9.txt
+└── s3c/                               # Subcase 3c archived per-member logs
+    ├── log_M1.txt
+    └── ... log_M9.txt
+```
+
+Notes
+- Per-member files follow a single canonical pattern: `log_M<ID>.txt` (e.g., `log_M3.txt`).
+- `run_tests.sh` runs all scenarios in order, teeing top-level output to `logs/scenarioX.log`, archiving per-member logs after each scenario (and for 3a/3b/3c individually).
+- `run_scenario.sh` runs one scenario, writes `logs/scenarioX.log`, archives its per-member logs, and clears live per-member logs afterward.
+
+## Requirements
+
+- JDK 21+ with `javac` and `java` on PATH
+- Bash (Linux/macOS)
+- GNU Make (for `Makefile` targets)
+- Netcat (`nc` or `ncat`) to send admin commands in test scripts
+- For unit tests: `junit-platform-console-standalone*.jar` placed in `lib/`
+
+## Build
+1. unzip the project
+2. cd into the project directory
+
+## How to Run
 
 ```
-make build
+Build the project:                      make build
+Run all scenarios:                      make tests / bash run_tests.sh
+Run a single scenario:                  bash run_scenario.sh s1|s2|s3|all [config]
+Run a member (generic):                 make member ID=M4 PROFILE=reliable CONFIG=network.config
+Run member shortcuts:                   make m1  (or m2..m9) PROFILE=standard CONFIG=network.config
+
+Run all unit tests:                     make unit
+Run a specific test class:              make test-class TEST=org.ProposerTest
+Search all possible tests:              make list-tests
+
+Clean all build files:                  make clean                
 ```
 
 ## Configuration
@@ -47,39 +128,18 @@ M9,localhost,9009
 
 Majority is computed as N/2 + 1 from the config size.
 
-## Run Members
-
-Launch members in separate terminals/shells:
-
-```
-make member ID=M1 PROFILE=reliable CONFIG=network.config
-make member ID=M2 PROFILE=latent   CONFIG=network.config
-make member ID=M3 PROFILE=failure  CONFIG=network.config
-make member ID=M4 PROFILE=standard CONFIG=network.config
-```
-
-Or directly:
-
-```
-java -cp out org.CouncilMember M1 --profile reliable --config network.config
-```
-
-Options:
-
-- `--profile <reliable|latent|failure|standard>`: initial profile (default: `standard`)
-- `--config <path>`: path to config file (default: `network.config`)
-
 ## Runtime Commands
 
-Type commands into a member’s console, or send them over TCP (e.g., with `nc` to the member’s port):
+After running a single member, Type commands into a live console, or send them over TCP (e.g., with `nc` to the member’s port):
 
 - `propose <Candidate>`: Start a Paxos round proposing the candidate (e.g., `M5`).
+- `profile <reliable|latent|failure|standard>`: Switch runtime profile.
+- `latency <minMs> <maxMs>`: Set runtime latency window.
+- `drop <rate>`: Set message drop rate 0.0–1.0.
 - `ids`: List members from the config.
 - `state`: Print internal node state snapshot.
 - `crash`: Terminate the process (simulates failure).
 - `help`, `exit`.
-
-Note: Profiles and network timing/drop behavior are set only at startup via the `--profile` CLI flag. No runtime reconfiguration.
 
 Consensus is printed as:
 
@@ -102,47 +162,57 @@ Where `TYPE` in {`PREPARE`, `PROMISE`, `ACCEPT_REQUEST`, `ACCEPTED`}.
 - `ACCEPT_REQUEST`: proposer -> all, with `proposalId` and chosen `value`.
 - `ACCEPTED`: acceptor -> all, confirms `proposalId` and `value` for learner aggregation.
 
-Proposal numbers are `seq*1000 + memberNumericId` (monotonic, unique per proposer).
+Proposal numbers are `seq*100 + memberNumericId` to maintain monotonic and unique proposalID for tie-breaking situations.
 
 ## Testing Scripts
 
-- Unix/macOS: `run_tests.sh` requires bash and `nc` (netcat).
-- Windows PowerShell: use `run_tests.ps1` (no external tools needed).
+- `run_tests.sh`: Bash runner that builds and executes all three scenarios (1, 2, 3a–3c) sequentially.
+- `run_scenario.sh`: Bash runner to execute a single scenario: `bash run_scenario.sh s1|s2|s3|all [config]`.
+- Netcat (`nc` or `ncat`) is recommended for sending admin commands; the runner attempts a Java fallback if unavailable.
 
-Run (Unix/macOS):
+Examples:
 
 ```
+# Run everything
 bash run_tests.sh
+
+# Run a single scenario
+./run_scenario.sh s2
+./run_scenario.sh s3 custom_network.config
 ```
 
-Outputs per-member logs `logs_M*.txt` and scenario summaries under `logs/`.
+Outputs per-member logs `log_M*.txt` and scenario summaries under `logs/`.
 
-Run (Windows PowerShell):
+## Unit/Integration Testing (Junit5) 
 
-```
-pwsh -File run_tests.ps1
-```
+Unit testings:
+- `AcceptorTest.java` 
+- `ProposerTest.java` 
+- `LearnerTest.java` 
+- `MessageTest.java` 
+- `MessageServerTest.java` 
+- `NetworkClientTest.java` 
+- `NetworkConfigTest.java` 
+- `MemberProfileTest.java`
 
-The PS script builds, launches members, sends admin commands using a tiny TCP helper, and captures logs similarly.
+Integration testings:
+- `PaxosIntegrationTest.java` — End-to-end Paxos run across members reaching consensus.
+
+
 
 ## Design Notes
 
-- Each member runs a TCP server for messages and also accepts plain-text admin commands over the same port to facilitate automation.
-- Profiles simulate network conditions on both send and receive. Failure profile does not auto-crash; issue `crash` command to terminate.
-- Proposers retry with higher proposal numbers if they do not reach quorum within a time window derived from the profile’s latency.
-- Acceptors follow Paxos safety: promise and accept only for non-decreasing proposal IDs. Acceptors broadcast `ACCEPTED` to all; learners decide when any (proposalId, value) gathers a majority.
-
-## Code Overview
-
-- `src/main/java/org/CouncilMember.java:1`: main entry; starts server, console; handles runtime commands.
-- `src/main/java/org/PaxosNode.java:1`: Paxos logic for proposer/acceptor/learner and state.
-- `src/main/java/org/Message.java:1`: message model and encoding/decoding (colon-delimited).
-- `src/main/java/org/NetworkConfig.java:1`: config loader and endpoint mapping (Endpoint co-located).
-- `src/main/java/org/MessageServer.java:1`: TCP listener to receive messages and admin commands.
-- `src/main/java/org/NetworkClient.java:1`: TCP sender with profile simulation.
-- `src/main/java/org/MemberProfile.java:1`: latency/drop simulation (profile set at startup only).
+- Members run a TCP server and accept plain-text admin commands on the same port (for automation/testing).
+- Profiles simulate latency/drop on both send/receive paths; failure profile requires an explicit `crash` command.
+- Proposers retry on timeouts with backoff and, when Phase 1 stalls, bump their proposal number.
+- Acceptors maintain `highestPromised` and never accept proposals lower than promised; they broadcast `ACCEPTED` on every accept to drive learner convergence.
+- Post-decision reinforcement: After the Learner decides, Acceptors only re-accept `ACCEPT_REQUEST(n, v)` when `v` equals the decided value and `n >= highestPromised`, then re-broadcast `ACCEPTED` to help late peers converge. This supports crash/restart without risking a second decision.
+- Phase 2 retries: Proposers safely resend `ACCEPT_REQUEST(n, v)` when Phase 2 is active but quorum isn’t reached; Acceptors’ post-decision guard ensures safety while aiding convergence.
+- Recovery after partial progress: Acceptors continue responding to higher `PREPARE(n)` with PROMISE (including prior accepted pairs). Proposers pick the highest previously accepted value seen in PROMISEs; otherwise they use their candidate. This recovers correctly from crashes/competing rounds.
+- Competing leaders: If Phase 1 stalls, Proposers escalate `n` (monotonic per-member) to avoid starvation. 
+- Learner convergence: Acceptors call `learner.trackAccepts` on every accept, and Proposers forward `ACCEPTED` to the Learner. The Learner prints `CONSENSUS:` once a majority is observed and ignores further accepts.
 
 ## Notes
-
-- No external dependencies. No hardcoded scenarios; everything is driven by runtime commands and config.
-- You may adjust `network.config` to change participants or ports. Majority adjusts automatically.
+- Runtime has no external dependencies. Unit tests require the JUnit console jar in `lib/`.
+- No hardcoded participants; everything is driven by `network.config`. Configurable during run time for members.
+- Current implementation can cause starvation for Proposer in phase 2, where it resends `ACCEPT_REQUEST(n, v)` after timeout while Acceptor may already established a higher `highestPromised` from others' proposals, leading to an infinite loop. One solution is to set another timeout for `ACCEPT_REQUEST(n, v)`, if it can not gather enough `ACCEPTED` then fallback to Phase 1 Prepare. 

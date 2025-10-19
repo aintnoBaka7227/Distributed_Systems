@@ -1,20 +1,38 @@
-[2025-10-19T15:50:42.196] [INFO] [M2] [Server-M2] Server bound on port 9002
-[2025-10-19T15:50:42.200] [INFO] [M2] [main] Listening on localhost:9002 profile=latent
-[2025-10-19T15:50:59.650] [PROTO] [M2] [Conn-/127.0.0.1:46222] RECV from=M4 type=PREPARE pid=104 val=null accId=null accVal=null
-[2025-10-19T15:51:00.478] [PROTO] [M2] [Conn-/127.0.0.1:46222] SEND to=M4 type=PROMISE pid=104 val=null
-[2025-10-19T15:51:01.937] [PROTO] [M2] [Conn-/127.0.0.1:43140] RECV from=M1 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:01.946] [INFO] [M2] [Conn-/127.0.0.1:43140] M2 LEARN count=1/5 for n=104 v=M7
-[2025-10-19T15:51:02.238] [PROTO] [M2] [Conn-/127.0.0.1:43144] RECV from=M4 type=ACCEPT_REQUEST pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:03.559] [PROTO] [M2] [Conn-/127.0.0.1:43156] RECV from=M4 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:03.560] [INFO] [M2] [Conn-/127.0.0.1:43156] M2 LEARN count=2/5 for n=104 v=M7
-[2025-10-19T15:51:03.568] [PROTO] [M2] [Conn-/127.0.0.1:43144] SEND to=M1 type=ACCEPTED pid=104 val=M7
-[2025-10-19T15:51:03.883] [PROTO] [M2] [Conn-/127.0.0.1:43172] RECV from=M5 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:03.885] [INFO] [M2] [Conn-/127.0.0.1:43172] M2 LEARN count=3/5 for n=104 v=M7
-[2025-10-19T15:51:03.994] [PROTO] [M2] [Conn-/127.0.0.1:43210] RECV from=M9 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:03.994] [INFO] [M2] [Conn-/127.0.0.1:43210] M2 LEARN count=4/5 for n=104 v=M7
-[2025-10-19T15:51:04.262] [PROTO] [M2] [Conn-/127.0.0.1:43182] RECV from=M4 type=PREPARE pid=204 val=null accId=null accVal=null
-[2025-10-19T15:51:04.811] [PROTO] [M2] [Conn-/127.0.0.1:43198] RECV from=M6 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:04.812] [INFO] [M2] [Conn-/127.0.0.1:43198] M2 LEARN count=5/5 for n=104 v=M7
-[2025-10-19T15:51:04.813] [DECIDE] [M2] [Conn-/127.0.0.1:43198] Consensus reached: M7
-[2025-10-19T15:51:04.821] [PROTO] [M2] [Conn-/127.0.0.1:43222] RECV from=M7 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
-[2025-10-19T15:51:05.788] [PROTO] [M2] [Conn-/127.0.0.1:43144] SEND to=M4 type=ACCEPTED pid=104 val=M7
+[2025-10-20 06:07:08.447] [INFO] [M2] [Server-M2] Server bound on port 9002
+[2025-10-20 06:07:08.453] [INFO] [M2] [main] Listening on localhost:9002 profile=latent
+Type 'help' for commands.
+[2025-10-20 06:07:40.025] [PROTO] [M2] [Conn-/127.0.0.1:41008] RECV from=M3 type=PREPARE pid=103 val=null accId=null accVal=null
+[2025-10-20 06:07:40.978] [PROTO] [M2] [Conn-/127.0.0.1:41008] SEND to=M3 type=PROMISE pid=103 val=null
+[2025-10-20 06:07:43.122] [PROTO] [M2] [Conn-/127.0.0.1:41010] RECV from=M1 type=ACCEPTED pid=103 val=M3 accId=null accVal=null
+[2025-10-20 06:07:43.136] [INFO] [M2] [Conn-/127.0.0.1:41010] M2 LEARN count=1/5 for n=103 v=M3
+[2025-10-20 06:07:43.770] [PROTO] [M2] [Conn-/127.0.0.1:41016] RECV from=M3 type=ACCEPT_REQUEST pid=103 val=M3 accId=null accVal=null
+[2025-10-20 06:07:44.559] [PROTO] [M2] [Conn-/127.0.0.1:41016] SEND to=M1 type=ACCEPTED pid=103 val=M3
+[2025-10-20 06:07:44.742] [PROTO] [M2] [Conn-/127.0.0.1:41024] RECV from=M4 type=PREPARE pid=104 val=null accId=null accVal=null
+[2025-10-20 06:07:45.355] [ERROR] [M2] [Conn-/127.0.0.1:41016] Failed to send to M3: Connection refused
+[2025-10-20 06:07:46.586] [PROTO] [M2] [Conn-/127.0.0.1:41048] RECV from=M4 type=ACCEPT_REQUEST pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:46.699] [PROTO] [M2] [Conn-/127.0.0.1:41034] RECV from=M1 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:46.700] [INFO] [M2] [Conn-/127.0.0.1:41034] M2 LEARN count=1/5 for n=104 v=M3
+[2025-10-20 06:07:46.830] [PROTO] [M2] [Conn-/127.0.0.1:41016] SEND to=M4 type=ACCEPTED pid=103 val=M3
+[2025-10-20 06:07:47.601] [PROTO] [M2] [Conn-/127.0.0.1:41064] RECV from=M4 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:47.611] [INFO] [M2] [Conn-/127.0.0.1:41064] M2 LEARN count=2/5 for n=104 v=M3
+[2025-10-20 06:07:47.799] [PROTO] [M2] [Conn-/127.0.0.1:41016] SEND to=M5 type=ACCEPTED pid=103 val=M3
+[2025-10-20 06:07:48.296] [PROTO] [M2] [Conn-/127.0.0.1:41086] RECV from=M1 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:48.296] [INFO] [M2] [Conn-/127.0.0.1:41086] M2 LEARN count=2/5 for n=104 v=M3
+[2025-10-20 06:07:48.477] [PROTO] [M2] [Conn-/127.0.0.1:41112] RECV from=M7 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:48.478] [INFO] [M2] [Conn-/127.0.0.1:41112] M2 LEARN count=3/5 for n=104 v=M3
+[2025-10-20 06:07:48.556] [PROTO] [M2] [Conn-/127.0.0.1:41076] RECV from=M9 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:48.557] [INFO] [M2] [Conn-/127.0.0.1:41076] M2 LEARN count=4/5 for n=104 v=M3
+[2025-10-20 06:07:48.623] [PROTO] [M2] [Conn-/127.0.0.1:41016] SEND to=M6 type=ACCEPTED pid=103 val=M3
+[2025-10-20 06:07:48.652] [PROTO] [M2] [Conn-/127.0.0.1:41062] RECV from=M5 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:48.659] [INFO] [M2] [Conn-/127.0.0.1:41062] M2 LEARN count=5/5 for n=104 v=M3
+[2025-10-20 06:07:48.660] [DECIDE] [M2] [Conn-/127.0.0.1:41062] Consensus reached: M3
+CONSENSUS: M3 has been elected Council President!
+[2025-10-20 06:07:48.758] [PROTO] [M2] [Conn-/127.0.0.1:41122] RECV from=M8 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:49.006] [PROTO] [M2] [Conn-/127.0.0.1:41098] RECV from=M4 type=ACCEPT_REQUEST pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:49.499] [PROTO] [M2] [Conn-/127.0.0.1:41016] SEND to=M7 type=ACCEPTED pid=103 val=M3
+[2025-10-20 06:07:50.612] [PROTO] [M2] [Conn-/127.0.0.1:41016] SEND to=M8 type=ACCEPTED pid=103 val=M3
+[2025-10-20 06:07:50.614] [PROTO] [M2] [Conn-/127.0.0.1:59190] RECV from=M7 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:50.619] [PROTO] [M2] [Conn-/127.0.0.1:59168] RECV from=M5 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+[2025-10-20 06:07:50.687] [PROTO] [M2] [Conn-/127.0.0.1:59180] RECV from=M4 type=ACCEPTED pid=104 val=M3 accId=null accVal=null
+=null
+[2025-10-20 06:07:50.687] [PROTO] [M2] [Conn-/127.0.0.1:59180] RECV from=M4 type=ACCEPTED pid=104 val=M3 accId=null accVal=null

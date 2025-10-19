@@ -1,5 +1,0 @@
-[2025-10-19T15:50:42.178] [INFO] [M3] [Server-M3] Server bound on port 9003
-[2025-10-19T15:50:42.185] [INFO] [M3] [main] Listening on localhost:9003 profile=failure
-Type 'help' for commands.
-[2025-10-19T15:50:57.411] [ADMIN] [M3] [Conn-/127.0.0.1:41324] crash
-Crashing by request via TCP...

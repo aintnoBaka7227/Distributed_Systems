@@ -10,17 +10,17 @@ import java.util.Date;
 
 /**
  * Lightweight console logger with per-member context. Designed to produce
- * clear, parseable logs for testing and assessment.
+ * clear, parseable logs for testing and assessment
  */
 public final class Logger {
     private static volatile String memberId = "?";
-    private static final SimpleDateFormat TS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private static final SimpleDateFormat TS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static volatile PrintWriter fileOut = null;
 
     private Logger() {}
 
     /**
-     * Initialize the logger with the current member ID.
+     * Initialize the logger with the current member ID
      * @param id member identifier (e.g., M1)
      */
     public static void init(String id) {
@@ -28,8 +28,8 @@ public final class Logger {
     }
 
     /**
-     * Also write logs to a per-member file inside the given directory.
-     * Files are named as log_<MemberId>.txt using UTF-8 encoding.
+     * Also write logs to a per-member file inside the given directory
+     * Files are named as log_<MemberId>.txt using UTF-8 encoding
      * @param dir directory path
      */
     public static synchronized void enableFile(String dir) {
@@ -48,7 +48,7 @@ public final class Logger {
     }
 
     /**
-     * Log an informational message.
+     * Log an informational message
      * @param msg message text
      */
     public static void info(String msg) {
