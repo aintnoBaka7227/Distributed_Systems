@@ -1,4 +1,0 @@
-[2025-10-20 08:10:46.499] [INFO] [M3] [Server-M3] Server bound on port 9003
-[2025-10-20 08:10:46.508] [INFO] [M3] [main] Listening on localhost:9003 profile=failure
-Type 'help' for commands.
-[INFO] [M3] [main] Listening on localhost:9003 profile=failure

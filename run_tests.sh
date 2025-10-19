@@ -68,8 +68,9 @@ start_member() {
   local profile=$2
   echo "Starting $id ($profile)"
   ensure_logs_dir
-  # Write per-member logs using the canonical pattern: logs/log_M*.txt
-  java -cp out org.CouncilMember "$id" --profile "$profile" --config "$CONFIG" > "logs/log_${id}.txt" 2>&1 &
+  # Do not create logs/logs_M*.txt anymore; rely on Java Logger (logs/log_M*.txt)
+  # Silence member stdout/stderr to keep runner output clean
+  java -cp out org.CouncilMember "$id" --profile "$profile" --config "$CONFIG" > /dev/null 2>&1 &
   echo $!
 }
 
@@ -234,24 +235,10 @@ clear_member_logs() {
   rm -f logs/log_M*.txt logs/logs_M*.txt 2>/dev/null || true
 }
 
-normalize_member_log_names() {
-  # Rename any legacy files logs/logs_M*.txt -> logs/log_M*.txt
-  shopt -s nullglob
-  for f in logs/logs_M*.txt; do
-    base=$(basename "$f")          # e.g., logs_M1.txt
-    id=${base#logs_}                # -> M1.txt
-    dest="logs/log_${id}"          # -> logs/log_M1.txt
-    mv -f "$f" "$dest" 2>/dev/null || true
-  done
-  shopt -u nullglob
-}
-
 save_member_logs() {
   local tag=$1
   local dir="logs/${tag}"
   mkdir -p "$dir"
-  # Ensure only canonical names are archived
-  normalize_member_log_names
   shopt -s nullglob
   for f in logs/log_M*.txt; do cp "$f" "$dir/"; done
   shopt -u nullglob

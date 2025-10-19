@@ -1,4 +1,0 @@
-[2025-10-20 08:10:46.521] [INFO] [M9] [Server-M9] Server bound on port 9009
-[2025-10-20 08:10:46.524] [INFO] [M9] [main] Listening on localhost:9009 profile=standard
-Type 'help' for commands.
-[INFO] [M9] [main] Listening on localhost:9009 profile=standard

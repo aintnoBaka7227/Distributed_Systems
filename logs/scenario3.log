@@ -1,23 +1,23 @@
 Scenario 3: Fault-Tolerance
 [S3a] Starting members...
 Starting M1 (reliable)
-14255
+60794
 Starting M2 (latent)
-14257
+60796
 Starting M3 (failure)
-14259
+60799
 Starting M4 (standard)
-14263
+60802
 Starting M5 (standard)
-14274
+60810
 Starting M6 (standard)
-14284
+60821
 Starting M7 (standard)
-14287
+60827
 Starting M8 (standard)
-14299
+60838
 Starting M9 (standard)
-14315
+60847
 Timeout waiting for port 9001
 [S3a] Proposing: M4 -> M5
 [S3a] Waiting for consensus...
@@ -27,30 +27,30 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 1 / 9
 [wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 3 / 9
-[wait] missing: M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 5 / 9
+[wait] missing: M3 M4 M9
 [wait] consensus lines seen: 9 / 9
 [S3a] Consensus achieved in 5s
 CONSENSUS: M5 has been elected Council President!
 [S3b] Restarting members...
 Starting M1 (reliable)
-16258
+62757
 Starting M2 (latent)
-16260
+62759
 Starting M3 (failure)
-16262
+62762
 Starting M4 (standard)
-16266
+62766
 Starting M5 (standard)
-16272
+62775
 Starting M6 (standard)
-16276
+62786
 Starting M7 (standard)
-16288
+62793
 Starting M8 (standard)
-16295
+62800
 Starting M9 (standard)
-16309
+62808
 Timeout waiting for port 9001
 [S3b] Proposing: M2 -> M2
 [S3b] Waiting for consensus...
@@ -62,125 +62,78 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 9
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
+[wait] consensus lines seen: 1 / 9
+[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 3 / 9
+[wait] missing: M2 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 5 / 9
+[wait] missing: M2 M8 M9
+[wait] consensus lines seen: 9 / 9
+[S3b] Consensus achieved in 8s
+CONSENSUS: M2 has been elected Council President!
+kill: (60794): No such process
+kill: (60796): No such process
+kill: (60799): No such process
+kill: (60802): No such process
+kill: (60810): No such process
+kill: (60821): No such process
+kill: (60827): No such process
+kill: (60838): No such process
+kill: (60847): No such process
+[S3c] Restarting members...
+Starting M1 (reliable)
+65035
+Starting M2 (latent)
+65037
+Starting M3 (failure)
+65040
+Starting M4 (standard)
+65043
+Starting M5 (standard)
+65052
+Starting M6 (standard)
+65061
+Starting M7 (standard)
+65067
+Starting M8 (standard)
+65074
+Starting M9 (standard)
+65084
+Timeout waiting for port 9001
+[S3c] Throttling M3 then proposing
+[S3c] Crashing M3 quickly
+[S3c] Proposing: M4 -> M7
+[S3c] Waiting for consensus (8 learners expected)...
+[wait] consensus lines seen: 0 / 8
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
+[wait] consensus lines seen: 0 / 8
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 1 / 8
+[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 4 / 8
+[wait] missing: M3 M4 M7 M8 M9
+[wait] consensus lines seen: 7 / 8
+[wait] missing: M3 M4
+[wait] consensus lines seen: 8 / 8
+[wait] missing: M3
+[S3c] Consensus achieved in 6s
+CONSENSUS: M7 has been elected Council President!
+kill: (60794): No such process
+kill: (60796): No such process
+kill: (60799): No such process
+kill: (60802): No such process
+kill: (60810): No such process
+kill: (60821): No such process
+kill: (60827): No such process
+kill: (60838): No such process
+kill: (60847): No such process
+kill: (62757): No such process
+kill: (62759): No such process
+kill: (62762): No such process
+kill: (62766): No such process
+kill: (62775): No such process
+kill: (62786): No such process
+kill: (62793): No such process
+kill: (62800): No such process
+kill: (62808): No such process
+kill: (65040): No such process

@@ -1,0 +1,40 @@
+[2025-10-20 08:47:34.503] [INFO] [M6] [Server-M6] Server bound on port 9006
+[2025-10-20 08:47:34.510] [INFO] [M6] [main] Listening on localhost:9006 profile=standard
+[2025-10-20 08:48:06.354] [PROTO] [M6] [Conn-/127.0.0.1:56124] RECV from=M3 type=PREPARE pid=103 val=null accId=null accVal=null
+[2025-10-20 08:48:06.618] [PROTO] [M6] [Conn-/127.0.0.1:56124] SEND to=M3 type=PROMISE pid=103 val=null
+[2025-10-20 08:48:09.532] [PROTO] [M6] [Conn-/127.0.0.1:56136] RECV from=M4 type=PREPARE pid=104 val=null accId=null accVal=null
+[2025-10-20 08:48:09.627] [PROTO] [M6] [Conn-/127.0.0.1:56136] SEND to=M4 type=PROMISE pid=104 val=null
+[2025-10-20 08:48:10.583] [PROTO] [M6] [Conn-/127.0.0.1:56142] RECV from=M1 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:10.591] [INFO] [M6] [Conn-/127.0.0.1:56142] M6 LEARN count=1/5 for n=104 v=M7
+[2025-10-20 08:48:12.036] [PROTO] [M6] [Conn-/127.0.0.1:58510] RECV from=M4 type=ACCEPT_REQUEST pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:12.098] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M1 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:12.418] [PROTO] [M6] [Conn-/127.0.0.1:58526] RECV from=M5 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:12.419] [INFO] [M6] [Conn-/127.0.0.1:58526] M6 LEARN count=2/5 for n=104 v=M7
+[2025-10-20 08:48:12.494] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M2 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:12.777] [ERROR] [M6] [Conn-/127.0.0.1:58510] Failed to send to M3: Connection refused
+[2025-10-20 08:48:12.928] [PROTO] [M6] [Conn-/127.0.0.1:58538] RECV from=M4 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:12.928] [INFO] [M6] [Conn-/127.0.0.1:58538] M6 LEARN count=3/5 for n=104 v=M7
+[2025-10-20 08:48:12.984] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M4 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:13.104] [PROTO] [M6] [Conn-/127.0.0.1:58542] RECV from=M1 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:13.105] [INFO] [M6] [Conn-/127.0.0.1:58542] M6 LEARN count=3/5 for n=104 v=M7
+[2025-10-20 08:48:13.209] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M5 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:13.409] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M7 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:13.510] [PROTO] [M6] [Conn-/127.0.0.1:58546] RECV from=M7 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:13.511] [INFO] [M6] [Conn-/127.0.0.1:58546] M6 LEARN count=4/5 for n=104 v=M7
+[2025-10-20 08:48:13.547] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M8 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:13.627] [PROTO] [M6] [Conn-/127.0.0.1:58510] SEND to=M9 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:13.627] [INFO] [M6] [Conn-/127.0.0.1:58510] M6 LEARN count=5/5 for n=104 v=M7
+[2025-10-20 08:48:13.628] [DECIDE] [M6] [Conn-/127.0.0.1:58510] Consensus reached: M7
+CONSENSUS: M7 has been elected Council President!
+[2025-10-20 08:48:14.265] [PROTO] [M6] [Conn-/127.0.0.1:58564] RECV from=M8 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:14.339] [PROTO] [M6] [Conn-/127.0.0.1:58576] RECV from=M2 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:14.356] [PROTO] [M6] [Conn-/127.0.0.1:58562] RECV from=M9 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:14.398] [PROTO] [M6] [Conn-/127.0.0.1:58582] RECV from=M4 type=ACCEPT_REQUEST pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:14.662] [PROTO] [M6] [Conn-/127.0.0.1:58582] SEND to=M1 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:14.965] [PROTO] [M6] [Conn-/127.0.0.1:58582] SEND to=M2 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:15.202] [PROTO] [M6] [Conn-/127.0.0.1:58594] RECV from=M4 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:15.227] [ERROR] [M6] [Conn-/127.0.0.1:58582] Failed to send to M3: Connection refused
+[2025-10-20 08:48:15.267] [PROTO] [M6] [Conn-/127.0.0.1:58584] RECV from=M5 type=ACCEPTED pid=104 val=M7 accId=null accVal=null
+[2025-10-20 08:48:15.299] [PROTO] [M6] [Conn-/127.0.0.1:58582] SEND to=M4 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:15.540] [PROTO] [M6] [Conn-/127.0.0.1:58582] SEND to=M5 type=ACCEPTED pid=104 val=M7
+[2025-10-20 08:48:15.677] [PROTO] [M6] [Conn-/127.0.0.1:58582] SEND to=M7 type=ACCEPTED pid=104 val=M7

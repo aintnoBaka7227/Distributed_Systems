@@ -8,3 +8,4 @@ Timeout waiting for port 9001
 [S2] Consensus achieved in 1s
 CONSENSUS: M8 has been elected Council President!
 [S2] Stopping members
+kill: (60538): No such process

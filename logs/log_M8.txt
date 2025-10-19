@@ -1,4 +1,0 @@
-[2025-10-20 08:10:46.523] [INFO] [M8] [Server-M8] Server bound on port 9008
-[2025-10-20 08:10:46.526] [INFO] [M8] [main] Listening on localhost:9008 profile=standard
-Type 'help' for commands.
-[INFO] [M8] [main] Listening on localhost:9008 profile=standard

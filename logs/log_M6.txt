@@ -1,4 +1,0 @@
-[2025-10-20 08:10:46.506] [INFO] [M6] [main] Listening on localhost:9006 profile=standard
-Type 'help' for commands.
-[2025-10-20 08:10:46.511] [INFO] [M6] [Server-M6] Server bound on port 9006
-[2025-10-20 08:10:46.511] [INFO] [M6] [Server-M6] Server bound on port 9006

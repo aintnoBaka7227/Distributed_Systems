@@ -108,6 +108,14 @@ public final class Logger {
      */
     public static void consensus(String value) {
         println("DECIDE", "Consensus reached: " + value);
+        // Also append the exact winner line to the per-member file so
+        // log_M*.txt contains the literal "CONSENSUS:" line used by scripts/tools.
+        try {
+            if (fileOut != null) {
+                fileOut.println("CONSENSUS: " + value + " has been elected Council President!");
+                fileOut.flush();
+            }
+        } catch (Exception ignored) {}
     }
 
     private static synchronized void println(String level, String msg) {

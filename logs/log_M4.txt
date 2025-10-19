@@ -1,4 +1,0 @@
-[2025-10-20 08:10:46.505] [INFO] [M4] [Server-M4] Server bound on port 9004
-[2025-10-20 08:10:46.509] [INFO] [M4] [main] Listening on localhost:9004 profile=standard
-Type 'help' for commands.
-[INFO] [M4] [main] Listening on localhost:9004 profile=standard
