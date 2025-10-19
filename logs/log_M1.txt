@@ -1,0 +1,4 @@
+[2025-10-20 08:10:46.509] [INFO] [M1] [Server-M1] Server bound on port 9001
+[2025-10-20 08:10:46.512] [INFO] [M1] [main] Listening on localhost:9001 profile=reliable
+Type 'help' for commands.
+[INFO] [M1] [main] Listening on localhost:9001 profile=reliable

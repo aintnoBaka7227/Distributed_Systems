@@ -3,8 +3,8 @@ Scenario 2: Concurrent Proposals
 Timeout waiting for port 9001
 [S2] Proposing concurrently (stagger=0.0001s): M1 -> M1, M8 -> M8
 [S2] Waiting for consensus...
-[wait] consensus lines seen: 3 / 9
-[wait] consensus lines seen: 10 / 9
+[wait] consensus lines seen: 4 / 9
+[wait] consensus lines seen: 9 / 9
 [S2] Consensus achieved in 1s
 CONSENSUS: M8 has been elected Council President!
 [S2] Stopping members

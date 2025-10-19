@@ -1,0 +1,4 @@
+[2025-10-20 08:10:46.502] [INFO] [M2] [Server-M2] Server bound on port 9002
+[2025-10-20 08:10:46.510] [INFO] [M2] [main] Listening on localhost:9002 profile=latent
+Type 'help' for commands.
+[INFO] [M2] [main] Listening on localhost:9002 profile=latent

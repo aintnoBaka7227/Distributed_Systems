@@ -1,0 +1,4 @@
+[2025-10-20 08:10:46.506] [INFO] [M7] [Server-M7] Server bound on port 9007
+[2025-10-20 08:10:46.510] [INFO] [M7] [main] Listening on localhost:9007 profile=standard
+Type 'help' for commands.
+[INFO] [M7] [main] Listening on localhost:9007 profile=standard

@@ -3,8 +3,8 @@ Scenario 1: Ideal Network
 Timeout waiting for port 9001
 [S1] Proposing: M4 -> M5
 [S1] Waiting for consensus...
-[wait] consensus lines seen: 3 / 9
+[wait] consensus lines seen: 6 / 9
 [wait] consensus lines seen: 9 / 9
-[S1] Consensus achieved in 1s
+[S1] Consensus achieved in 2s
 CONSENSUS: M5 has been elected Council President!
 [S1] Stopping members
