@@ -1,23 +1,23 @@
 Scenario 3: Fault-Tolerance
 [S3a] Starting members...
 Starting M1 (reliable)
-12885
+46646
 Starting M2 (latent)
-12887
+46648
 Starting M3 (failure)
-12889
+46651
 Starting M4 (standard)
-12893
+46654
 Starting M5 (standard)
-12901
+46656
 Starting M6 (standard)
-12911
+46669
 Starting M7 (standard)
-12919
+46674
 Starting M8 (standard)
-12930
+46683
 Starting M9 (standard)
-12956
+46705
 Timeout waiting for port 9001
 [S3a] Proposing: M4 -> M5
 [S3a] Waiting for consensus...
@@ -25,41 +25,29 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 9
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 1 / 9
-[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 5 / 9
-[wait] missing: M2 M8 M9
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
+[wait] consensus lines seen: 2 / 9
+[wait] missing: M3 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 9 / 9
-[S3a] Consensus achieved in 11s
+[S3a] Consensus achieved in 4s
 [S3b] Restarting members...
 Starting M1 (reliable)
-14889
+48356
 Starting M2 (latent)
-14892
+48358
 Starting M3 (failure)
-14894
+48361
 Starting M4 (standard)
-14902
+48364
 Starting M5 (standard)
-14904
+48372
 Starting M6 (standard)
-14914
+48378
 Starting M7 (standard)
-14928
+48393
 Starting M8 (standard)
-14935
+48398
 Starting M9 (standard)
-14955
+48408
 Timeout waiting for port 9001
 [S3b] Proposing: M2 -> M2
 [S3b] Waiting for consensus...
@@ -67,86 +55,67 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 9
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 9
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 2 / 9
-[wait] missing: M2 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 1 / 9
+[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 4 / 9
-[wait] missing: M2 M4 M7 M8 M9
-[wait] consensus lines seen: 7 / 9
-[wait] missing: M2
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
-[wait] consensus lines seen: 8 / 9
-[wait] missing: M2
+[wait] missing: M6 M7 M8 M9
 [wait] consensus lines seen: 9 / 9
-[S3b] Consensus achieved in 10s
-kill: (12885): No such process
-kill: (12887): No such process
-kill: (12889): No such process
-kill: (12893): No such process
-kill: (12901): No such process
-kill: (12911): No such process
-kill: (12919): No such process
-kill: (12930): No such process
-kill: (12956): No such process
+[S3b] Consensus achieved in 5s
+kill: (46646): No such process
+kill: (46648): No such process
+kill: (46651): No such process
+kill: (46654): No such process
+kill: (46656): No such process
+kill: (46669): No such process
+kill: (46674): No such process
+kill: (46683): No such process
+kill: (46705): No such process
 [S3c] Restarting members...
 Starting M1 (reliable)
-16852
+50077
 Starting M2 (latent)
-16854
+50079
 Starting M3 (failure)
-16857
+50082
 Starting M4 (standard)
-16859
+50088
 Starting M5 (standard)
-16868
+50093
 Starting M6 (standard)
-16876
+50105
 Starting M7 (standard)
-16892
+50123
 Starting M8 (standard)
-16907
+50133
 Starting M9 (standard)
-16917
+50151
 Timeout waiting for port 9001
 [S3c] Throttling M3 then proposing
 [S3c] Crashing M3 quickly
 [S3c] Proposing: M4 -> M7
 [S3c] Waiting for consensus (8 learners expected)...
-[wait] consensus lines seen: 0 / 8
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 0 / 8
-[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 1 / 8
 [wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 2 / 8
-[wait] missing: M2 M3 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 5 / 8
-[wait] missing: M2 M3 M7 M9
-[wait] consensus lines seen: 7 / 8
-[wait] missing: M2 M3
+[wait] consensus lines seen: 3 / 8
+[wait] missing: M2 M6 M7 M8 M9
 [wait] consensus lines seen: 8 / 8
-[wait] missing: M3
-[S3c] Consensus achieved in 7s
-kill: (12885): No such process
-kill: (12887): No such process
-kill: (12889): No such process
-kill: (12893): No such process
-kill: (12901): No such process
-kill: (12911): No such process
-kill: (12919): No such process
-kill: (12930): No such process
-kill: (12956): No such process
-kill: (14889): No such process
-kill: (14892): No such process
-kill: (14894): No such process
-kill: (14902): No such process
-kill: (14904): No such process
-kill: (14914): No such process
-kill: (14928): No such process
-kill: (14935): No such process
-kill: (14955): No such process
-kill: (16857): No such process
+[wait] missing: M2
+[S3c] Consensus achieved in 2s
+kill: (46646): No such process
+kill: (46648): No such process
+kill: (46651): No such process
+kill: (46654): No such process
+kill: (46656): No such process
+kill: (46669): No such process
+kill: (46674): No such process
+kill: (46683): No such process
+kill: (46705): No such process
+kill: (48356): No such process
+kill: (48358): No such process
+kill: (48361): No such process
+kill: (48364): No such process
+kill: (48372): No such process
+kill: (48378): No such process
+kill: (48393): No such process
+kill: (48398): No such process
+kill: (48408): No such process

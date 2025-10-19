@@ -100,7 +100,7 @@ scenario2() {
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
   # Concurrent proposals from M1 and M8
   echo "[S2] Proposing concurrently: M1 -> M1, M8 -> M8"; send_cmd 9001 propose M1
-  sleep 0.5
+  sleep 0.001
   send_cmd 9008 propose M8
   echo "[S2] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S2" S2 || true
