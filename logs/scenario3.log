@@ -1,23 +1,23 @@
 Scenario 3: Fault-Tolerance
 [S3a] Starting members...
 Starting M1 (reliable)
-85793
+3984
 Starting M2 (latent)
-85795
+3986
 Starting M3 (failure)
-85798
+3988
 Starting M4 (standard)
-85801
+3992
 Starting M5 (standard)
-85809
+3998
 Starting M6 (standard)
-85817
+4007
 Starting M7 (standard)
-85823
+4014
 Starting M8 (standard)
-85834
+4022
 Starting M9 (standard)
-85844
+4035
 Timeout waiting for port 9001
 [S3a] Proposing: M4 -> M5
 [S3a] Waiting for consensus...
@@ -27,30 +27,30 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 1 / 9
 [wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 4 / 9
-[wait] missing: M4 M6 M7 M8 M9
+[wait] consensus lines seen: 7 / 9
+[wait] missing: M3 M9
 [wait] consensus lines seen: 10 / 9
 [S3a] Consensus achieved in 5s
 CONSENSUS: M5 has been elected Council President!
 [S3b] Restarting members...
 Starting M1 (reliable)
-87949
+6133
 Starting M2 (latent)
-87951
+6135
 Starting M3 (failure)
-87953
+6138
 Starting M4 (standard)
-87957
+6141
 Starting M5 (standard)
-87959
+6149
 Starting M6 (standard)
-87973
+6162
 Starting M7 (standard)
-87982
+6171
 Starting M8 (standard)
-87993
+6177
 Starting M9 (standard)
-88006
+6198
 Timeout waiting for port 9001
 [S3b] Proposing: M2 -> M2
 [S3b] Waiting for consensus...
@@ -61,13 +61,11 @@ Timeout waiting for port 9001
 [wait] consensus lines seen: 0 / 9
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 9
-[wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 3 / 9
-[wait] missing: M2 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 7 / 9
-[wait] missing: M2 M9
-[wait] consensus lines seen: 7 / 9
-[wait] missing: M2 M9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 4 / 9
+[wait] missing: M2 M3 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 4 / 9
+[wait] missing: M2 M6 M7 M8 M9
 [wait] consensus lines seen: 8 / 9
 [wait] missing: M2
 [wait] consensus lines seen: 8 / 9
@@ -78,37 +76,41 @@ Timeout waiting for port 9001
 [wait] missing: M2
 [wait] consensus lines seen: 8 / 9
 [wait] missing: M2
-[wait] consensus lines seen: 9 / 9
+[wait] consensus lines seen: 8 / 9
+[wait] missing: M2
+[wait] consensus lines seen: 8 / 9
+[wait] missing: M2
+[wait] consensus lines seen: 10 / 9
 [S3b] Consensus achieved in 17s
 CONSENSUS: M2 has been elected Council President!
-kill: (85793): No such process
-kill: (85795): No such process
-kill: (85798): No such process
-kill: (85801): No such process
-kill: (85809): No such process
-kill: (85817): No such process
-kill: (85823): No such process
-kill: (85834): No such process
-kill: (85844): No such process
+kill: (3984): No such process
+kill: (3986): No such process
+kill: (3988): No such process
+kill: (3992): No such process
+kill: (3998): No such process
+kill: (4007): No such process
+kill: (4014): No such process
+kill: (4022): No such process
+kill: (4035): No such process
 [S3c] Restarting members...
 Starting M1 (reliable)
-90200
+8490
 Starting M2 (latent)
-90202
+8492
 Starting M3 (failure)
-90204
+8494
 Starting M4 (standard)
-90208
+8498
 Starting M5 (standard)
-90216
+8500
 Starting M6 (standard)
-90227
+8509
 Starting M7 (standard)
-90232
+8522
 Starting M8 (standard)
-90238
+8530
 Starting M9 (standard)
-90254
+8545
 Timeout waiting for port 9001
 [S3c] Throttling M3 then proposing
 [S3c] Crashing M3 quickly
@@ -120,30 +122,28 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 8
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 2 / 8
+[wait] consensus lines seen: 1 / 8
 [wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 6 / 8
-[wait] missing: M3 M6 M7 M9
 [wait] consensus lines seen: 8 / 8
 [wait] missing: M3
 [S3c] Consensus achieved in 5s
-CONSENSUS: M3 has been elected Council President!
-kill: (85793): No such process
-kill: (85795): No such process
-kill: (85798): No such process
-kill: (85801): No such process
-kill: (85809): No such process
-kill: (85817): No such process
-kill: (85823): No such process
-kill: (85834): No such process
-kill: (85844): No such process
-kill: (87949): No such process
-kill: (87951): No such process
-kill: (87953): No such process
-kill: (87957): No such process
-kill: (87959): No such process
-kill: (87973): No such process
-kill: (87982): No such process
-kill: (87993): No such process
-kill: (88006): No such process
-kill: (90204): No such process
+CONSENSUS: M7 has been elected Council President!
+kill: (3984): No such process
+kill: (3986): No such process
+kill: (3988): No such process
+kill: (3992): No such process
+kill: (3998): No such process
+kill: (4007): No such process
+kill: (4014): No such process
+kill: (4022): No such process
+kill: (4035): No such process
+kill: (6133): No such process
+kill: (6135): No such process
+kill: (6138): No such process
+kill: (6141): No such process
+kill: (6149): No such process
+kill: (6162): No such process
+kill: (6171): No such process
+kill: (6177): No such process
+kill: (6198): No such process
+kill: (8494): No such process

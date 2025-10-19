@@ -1,34 +1,33 @@
-[2025-10-20 06:05:35.008] [INFO] [M3] [Server-M3] Server bound on port 9003
-[2025-10-20 06:05:35.013] [INFO] [M3] [main] Listening on localhost:9003 profile=reliable
+[2025-10-20 07:58:45.882] [INFO] [M3] [Server-M3] Server bound on port 9003
+[2025-10-20 07:58:45.888] [INFO] [M3] [main] Listening on localhost:9003 profile=reliable
 Type 'help' for commands.
-[2025-10-20 06:05:51.384] [PROTO] [M3] [Conn-/127.0.0.1:38086] RECV from=M1 type=PREPARE pid=101 val=null accId=null accVal=null
-[2025-10-20 06:05:51.387] [PROTO] [M3] [Conn-/127.0.0.1:38096] RECV from=M8 type=PREPARE pid=108 val=null accId=null accVal=null
-[2025-10-20 06:05:51.406] [PROTO] [M3] [Conn-/127.0.0.1:38086] SEND to=M1 type=PROMISE pid=101 val=null
-[2025-10-20 06:05:51.410] [PROTO] [M3] [Conn-/127.0.0.1:38096] SEND to=M8 type=PROMISE pid=108 val=null
-[2025-10-20 06:05:51.457] [PROTO] [M3] [Conn-/127.0.0.1:38110] RECV from=M8 type=ACCEPT_REQUEST pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.466] [PROTO] [M3] [Conn-/127.0.0.1:38116] RECV from=M1 type=ACCEPT_REQUEST pid=101 val=M1 accId=null accVal=null
-[2025-10-20 06:05:51.467] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M1 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.469] [PROTO] [M3] [Conn-/127.0.0.1:38130] RECV from=M2 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.470] [PROTO] [M3] [Conn-/127.0.0.1:38134] RECV from=M1 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.473] [PROTO] [M3] [Conn-/127.0.0.1:38140] RECV from=M4 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.474] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M2 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.481] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M4 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.483] [INFO] [M3] [Conn-/127.0.0.1:38130] M3 LEARN count=1/5 for n=108 v=M8
-[2025-10-20 06:05:51.484] [INFO] [M3] [Conn-/127.0.0.1:38140] M3 LEARN count=2/5 for n=108 v=M8
-[2025-10-20 06:05:51.485] [INFO] [M3] [Conn-/127.0.0.1:38134] M3 LEARN count=3/5 for n=108 v=M8
-[2025-10-20 06:05:51.488] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M5 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.489] [PROTO] [M3] [Conn-/127.0.0.1:38168] RECV from=M6 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.490] [INFO] [M3] [Conn-/127.0.0.1:38168] M3 LEARN count=4/5 for n=108 v=M8
-[2025-10-20 06:05:51.494] [PROTO] [M3] [Conn-/127.0.0.1:38156] RECV from=M5 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.495] [PROTO] [M3] [Conn-/127.0.0.1:38176] RECV from=M7 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.496] [INFO] [M3] [Conn-/127.0.0.1:38156] M3 LEARN count=5/5 for n=108 v=M8
-[2025-10-20 06:05:51.497] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M6 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.497] [DECIDE] [M3] [Conn-/127.0.0.1:38156] Consensus reached: M8
+[2025-10-20 07:59:00.236] [PROTO] [M3] [Conn-/127.0.0.1:59244] RECV from=M1 type=PREPARE pid=101 val=null accId=null accVal=null
+[2025-10-20 07:59:00.239] [PROTO] [M3] [Conn-/127.0.0.1:59256] RECV from=M8 type=PREPARE pid=108 val=null accId=null accVal=null
+[2025-10-20 07:59:00.265] [PROTO] [M3] [Conn-/127.0.0.1:59244] SEND to=M1 type=PROMISE pid=101 val=null
+[2025-10-20 07:59:00.274] [PROTO] [M3] [Conn-/127.0.0.1:59256] SEND to=M8 type=PROMISE pid=108 val=null
+[2025-10-20 07:59:00.306] [PROTO] [M3] [Conn-/127.0.0.1:59272] RECV from=M1 type=ACCEPT_REQUEST pid=101 val=M1 accId=null accVal=null
+[2025-10-20 07:59:00.314] [PROTO] [M3] [Conn-/127.0.0.1:59288] RECV from=M8 type=ACCEPT_REQUEST pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.322] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M1 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.324] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M2 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.329] [PROTO] [M3] [Conn-/127.0.0.1:59304] RECV from=M1 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.333] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M4 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.335] [PROTO] [M3] [Conn-/127.0.0.1:59318] RECV from=M2 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.340] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M5 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.342] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M6 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.343] [INFO] [M3] [Conn-/127.0.0.1:59304] M3 LEARN count=1/5 for n=108 v=M8
+[2025-10-20 07:59:00.344] [INFO] [M3] [Conn-/127.0.0.1:59318] M3 LEARN count=2/5 for n=108 v=M8
+[2025-10-20 07:59:00.347] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M7 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.350] [PROTO] [M3] [Conn-/127.0.0.1:59330] RECV from=M6 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.352] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M8 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.353] [INFO] [M3] [Conn-/127.0.0.1:59330] M3 LEARN count=3/5 for n=108 v=M8
+[2025-10-20 07:59:00.356] [PROTO] [M3] [Conn-/127.0.0.1:59288] SEND to=M9 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.357] [INFO] [M3] [Conn-/127.0.0.1:59288] M3 LEARN count=4/5 for n=108 v=M8
+[2025-10-20 07:59:00.358] [PROTO] [M3] [Conn-/127.0.0.1:59354] RECV from=M7 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.359] [INFO] [M3] [Conn-/127.0.0.1:59354] M3 LEARN count=5/5 for n=108 v=M8
+[2025-10-20 07:59:00.365] [PROTO] [M3] [Conn-/127.0.0.1:59346] RECV from=M4 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.366] [DECIDE] [M3] [Conn-/127.0.0.1:59354] Consensus reached: M8
+[2025-10-20 07:59:00.368] [PROTO] [M3] [Conn-/127.0.0.1:59362] RECV from=M5 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
 CONSENSUS: M8 has been elected Council President!
-[2025-10-20 06:05:51.501] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M7 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.507] [PROTO] [M3] [Conn-/127.0.0.1:38190] RECV from=M8 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.512] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M8 type=ACCEPTED pid=108 val=M8
-[2025-10-20 06:05:51.512] [PROTO] [M3] [Conn-/127.0.0.1:38204] RECV from=M9 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
-[2025-10-20 06:05:51.514] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M9 type=ACCEPTED pid=108 val=M8
-8 accId=null accVal=null
-[2025-10-20 06:05:51.514] [PROTO] [M3] [Conn-/127.0.0.1:38110] SEND to=M9 type=ACCEPTED pid=108 val=M8
+[2025-10-20 07:59:00.373] [PROTO] [M3] [Conn-/127.0.0.1:59366] RECV from=M8 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.389] [PROTO] [M3] [Conn-/127.0.0.1:59368] RECV from=M9 type=ACCEPTED pid=108 val=M8 accId=null accVal=null
+[2025-10-20 07:59:00.389] [PROTO] [M3] [Conn-/127.0.0.1:59368] RECV from=M9 type=ACCEPTED pid=108 val=M8 accId=null accVal=null

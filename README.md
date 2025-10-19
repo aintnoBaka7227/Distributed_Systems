@@ -94,6 +94,7 @@ Notes
 - GNU Make (for `Makefile` targets)
 - Netcat (`nc` or `ncat`) to send admin commands in test scripts
 - For unit tests: `junit-platform-console-standalone*.jar` placed in `lib/`
+- Convert from CRLF -> LF
 
 ## Build
 1. unzip the project
