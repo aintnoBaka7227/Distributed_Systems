@@ -44,6 +44,8 @@ TIMEOUT_S2=${TIMEOUT_S2:-240}
 TIMEOUT_S3A=${TIMEOUT_S3A:-180}
 TIMEOUT_S3B=${TIMEOUT_S3B:-180}
 TIMEOUT_S3C=${TIMEOUT_S3C:-180}
+# Stagger (seconds) between the two concurrent proposals in Scenario 2
+S2_STAGGER=${S2_STAGGER:-0.000}
 
 start_member() {
   local id=$1
@@ -86,6 +88,8 @@ scenario1() {
   echo "[S1] Proposing: M4 -> M5"; send_cmd 9004 propose M5
   echo "[S1] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S1" S1 || true
+  # Print winner in required format
+  grep -h "^CONSENSUS:" logs/log_M*.txt 2>/dev/null | head -n 1 || true
   echo "[S1] Stopping members"
   kill_bg
 }
@@ -98,12 +102,19 @@ scenario2() {
     pids+=( $(start_member "$id" reliable) )
   done
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
-  # Concurrent proposals from M1 and M8
-  echo "[S2] Proposing concurrently: M1 -> M1, M8 -> M8"; send_cmd 9001 propose M1
-  sleep 0.001
-  send_cmd 9008 propose M8
+  # Concurrent proposals from M1 and M8 with configurable stagger
+  echo "[S2] Proposing concurrently (stagger=${S2_STAGGER}s): M1 -> M1, M8 -> M8"
+  (
+    send_cmd 9001 propose M1
+  ) &
+  (
+    sleep "$S2_STAGGER"; send_cmd 9008 propose M8
+  ) &
+  wait
   echo "[S2] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S2" S2 || true
+  # Print winner in required format
+  grep -h "^CONSENSUS:" logs/log_M*.txt 2>/dev/null | head -n 1 || true
   echo "[S2] Stopping members"
   kill_bg
 }
@@ -125,6 +136,7 @@ scenario3() {
   echo "[S3a] Proposing: M4 -> M5"; send_cmd 9004 propose M5
   echo "[S3a] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S3A" S3a || true
+  grep -h "^CONSENSUS:" logs/log_M*.txt 2>/dev/null | head -n 1 || true
   kill_bg
   save_member_logs s3a
   clear_member_logs
@@ -144,6 +156,7 @@ scenario3() {
   echo "[S3b] Proposing: M2 -> M2"; send_cmd 9002 propose M2
   echo "[S3b] Waiting for consensus..."
   wait_and_time 9 "$TIMEOUT_S3B" S3b || true
+  grep -h "^CONSENSUS:" logs/log_M*.txt 2>/dev/null | head -n 1 || true
   kill_bg
   save_member_logs s3b
   clear_member_logs
@@ -162,7 +175,6 @@ scenario3() {
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
   # M3 starts then crashes quickly after PREPARE (before Phase 2)
   echo "[S3c] Throttling M3 then proposing"
-  send_cmd 9003 latency 800 1200
   send_cmd 9003 propose M3
   sleep 0.05
   # simulate crash quickly to avoid ACCEPT phase from M3
@@ -173,6 +185,7 @@ scenario3() {
   echo "[S3c] Proposing: M4 -> M7"; send_cmd 9004 propose M7
   echo "[S3c] Waiting for consensus (8 learners expected)..."
   wait_and_time 8 "$TIMEOUT_S3C" S3c || true
+  grep -h "^CONSENSUS:" logs/log_M*.txt 2>/dev/null | head -n 1 || true
   kill_bg
   save_member_logs s3c
 }

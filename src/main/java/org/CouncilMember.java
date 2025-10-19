@@ -12,48 +12,42 @@ import java.util.Locale;
  */
 public class CouncilMember {
 
+    public static String memberID;
+    public static String profileStatus;
+    public static String configFilePath;
     /**
      * Main entry for a council member process.
      * Usage: java -cp out org.CouncilMember M1 --profile reliable [--config network.config]
      * Arguments:
-     *  - memberId: e.g., M1..M9
+     *  - memberID: e.g., M1..M9
      *  - --profile <reliable|latent|failure|standard>: initial timing/drop profile
      *  - --config <path>: network configuration file
      * @param args command-line args
      */
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.out.println("Usage: java org.CouncilMember <MemberId> [--profile <reliable|latent|failure|standard>] [--config <path>]");
+            System.out.println("Usage: java org.CouncilMember <memberID> [--profile <reliable|latent|failure|standard>] [--config <path>]");
             return;
         }
 
-        String memberId = args[0];
-        String profileArg = "standard";
-        String configPath = "network.config";
-        for (int i = 1; i < args.length; i++) {
-            if ("--profile".equals(args[i]) && i + 1 < args.length) {
-                profileArg = args[++i];
-            } else if ("--config".equals(args[i]) && i + 1 < args.length) {
-                configPath = args[++i];
-            }
-        }
+        parseArgs(args);
 
         try {
-            NetworkConfig config = NetworkConfig.load(configPath);
-            Endpoint self = config.getEndpoint(memberId);
+            NetworkConfig config = NetworkConfig.load(configFilePath);
+            Endpoint self = config.getEndpoint(memberID);
             if (self == null) {
-                System.err.println("Member " + memberId + " not found in config " + configPath);
+                System.err.println("Member " + memberID + " not found in config " + configFilePath);
                 return;
             }
 
-            MemberProfile profile = MemberProfile.fromName(profileArg);
+            MemberProfile profile = MemberProfile.fromName(profileStatus);
             NetworkClient client = new NetworkClient(config, profile);
-            PaxosNode node = new PaxosNode(memberId, config, client, profile);
-            Logger.init(memberId);
+            PaxosNode node = new PaxosNode(memberID, config, client, profile);
+            Logger.init(memberID);
             Logger.enableFile("logs");
 
             MessageServer server = new MessageServer(self.port, profile, node);
-            Thread serverThread = new Thread(server, "Server-" + memberId);
+            Thread serverThread = new Thread(server, "Server-" + memberID);
             serverThread.setDaemon(true);
             serverThread.start();
 
@@ -76,37 +70,13 @@ public class CouncilMember {
                     continue;
                 }
                 if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
-                    System.out.println("Exiting " + memberId);
+                    System.out.println("Exiting " + memberID);
                     break;
                 }
                 try {
                     if (line.toLowerCase(Locale.ROOT).startsWith("propose ")) {
                         String candidate = line.substring("propose ".length()).trim();
                         node.initiateProposal(candidate);
-                    } else if (line.toLowerCase(Locale.ROOT).startsWith("profile ")) {
-                        String name = line.substring("profile ".length()).trim();
-                        MemberProfile np = MemberProfile.fromName(name);
-                        profile.updateFrom(np);
-                        Logger.admin("profile set to " + profile.getName());
-                    } else if (line.toLowerCase(Locale.ROOT).startsWith("latency ")) {
-                        String[] parts = line.split("\\s+");
-                        if (parts.length >= 3) {
-                            int min = Integer.parseInt(parts[1]);
-                            int max = Integer.parseInt(parts[2]);
-                            profile.setLatency(min, max);
-                            Logger.admin("latency set to " + min + "-" + max + " ms");
-                        } else {
-                            System.out.println("Usage: latency <minMs> <maxMs>");
-                        }
-                    } else if (line.toLowerCase(Locale.ROOT).startsWith("drop ")) {
-                        String[] parts = line.split("\\s+");
-                        if (parts.length >= 2) {
-                            double rate = Double.parseDouble(parts[1]);
-                            profile.setDropRate(rate);
-                            Logger.admin("drop rate set to " + rate);
-                        } else {
-                            System.out.println("Usage: drop <rate 0.0-1.0>");
-                        }
                     } else if (line.equalsIgnoreCase("crash")) {
                         Logger.admin("crash requested");
                         System.exit(1);
@@ -128,13 +98,23 @@ public class CouncilMember {
         }
     }
 
+    private static void parseArgs(String[] args) {
+        memberID = args[0];
+        profileStatus = "standard";
+        configFilePath = "network.config";
+        for (int i = 1; i < args.length; i++) {
+            if ("--profile".equals(args[i]) && i + 1 < args.length) {
+                profileStatus = args[++i];
+            } else if ("--config".equals(args[i]) && i + 1 < args.length) {
+                configFilePath = args[++i];
+            }
+        }
+    }
+
     private static void printHelp() {
         System.out.println("Commands:\n" +
                 "  help                      Show this help\n" +
                 "  propose <Candidate>       Start Paxos to elect candidate (e.g., M5)\n" +
-                "  profile <name>            Set profile: reliable|latent|failure|standard\n" +
-                "  latency <min> <max>       Set artificial latency range in ms\n" +
-                "  drop <rate>               Set message drop rate 0.0-1.0\n" +
                 "  ids                       List members from config\n" +
                 "  state                     Print internal node state\n" +
                 "  crash                     Terminate this process\n" +

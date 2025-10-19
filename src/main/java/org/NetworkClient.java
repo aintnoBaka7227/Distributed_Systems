@@ -21,21 +21,23 @@ public class NetworkClient {
 
     /**
      * Send message to a specific member by ID.
-     * @param toId destination member id
+     * @param toDestinationId destination member id
      * @param m message
      */
-    public void send(String toId, Message m) {
-        Endpoint ep = config.getEndpoint(toId);
-        if (ep == null) return;
+    public void sendMessage(String toDestinationId, Message m) {
+        Endpoint endpoint = config.getEndpoint(toDestinationId);
+        if (endpoint == null) return;
         // simulate send-side profile
         if (!profile.beforeNetworkAction()) return; // drop
-        try (Socket sock = new Socket()) {
-            sock.connect(new InetSocketAddress(ep.host, ep.port), 1000);
-            PrintWriter pw = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
-            pw.println(m.encode());
-            pw.flush();
-            Logger.messageSent(toId, m);
-        } catch (IOException ignored) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(endpoint.host, endpoint.port), 1000);
+            try (PrintWriter out = new PrintWriter(
+                new OutputStreamWriter(socket.getOutputStream()), true)) {
+                out.println(m.constructMessage());
+                Logger.messageSent(toDestinationId, m);
+            }
+        } catch (IOException e) {
+            Logger.error("Failed to send to " + toDestinationId + ": " + e.getMessage());
         }
     }
 
@@ -45,11 +47,11 @@ public class NetworkClient {
      * @param m message
      * @param excludeSelf whether to exclude self
      */
-    public void broadcast(String selfId, Message m, boolean excludeSelf) {
+    public void broadcastMessage(String selfId, Message m, boolean excludeSelf) {
         List<String> ids = config.getMemberIds();
         for (String id : ids) {
             if (excludeSelf && id.equals(selfId)) continue;
-            send(id, m);
+            sendMessage(id, m);
         }
     }
 }

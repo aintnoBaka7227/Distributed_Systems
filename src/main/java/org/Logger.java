@@ -78,7 +78,7 @@ public final class Logger {
      */
     public static void messageSent(String toId, Message m) {
         String text = String.format("SEND to=%s type=%s pid=%s val=%s", toId, m.type,
-                String.valueOf(m.proposalId), String.valueOf(m.value));
+                String.valueOf(m.proposalID), String.valueOf(m.proposalVal));
         println("PROTO", text);
     }
 
@@ -89,8 +89,8 @@ public final class Logger {
      */
     public static void messageReceived(String fromId, Message m) {
         String text = String.format("RECV from=%s type=%s pid=%s val=%s accId=%s accVal=%s",
-                fromId, m.type, String.valueOf(m.proposalId), String.valueOf(m.value),
-                String.valueOf(m.acceptedId), String.valueOf(m.acceptedValue));
+                fromId, m.type, String.valueOf(m.proposalID), String.valueOf(m.proposalVal),
+                String.valueOf(m.acceptedID), String.valueOf(m.acceptedValue));
         println("PROTO", text);
     }
 

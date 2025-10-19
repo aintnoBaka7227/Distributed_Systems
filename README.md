@@ -74,12 +74,12 @@ Options:
 Type commands into a member’s console, or send them over TCP (e.g., with `nc` to the member’s port):
 
 - `propose <Candidate>`: Start a Paxos round proposing the candidate (e.g., `M5`).
-- `profile <name>`: Change profile live (`reliable`, `latent`, `failure`, `standard`).
-- `latency <min> <max>`: Set artificial latency in ms.
-- `drop <rate>`: Set drop probability (0.0–1.0).
 - `ids`: List members from the config.
+- `state`: Print internal node state snapshot.
 - `crash`: Terminate the process (simulates failure).
 - `help`, `exit`.
+
+Note: Profiles and network timing/drop behavior are set only at startup via the `--profile` CLI flag. No runtime reconfiguration.
 
 Consensus is printed as:
 
@@ -89,10 +89,10 @@ CONSENSUS: M5 has been elected Council President!
 
 ## Message Design
 
-Text-based, one message per line, pipe-delimited:
+Text-based, one message per line, colon-delimited:
 
 ```
-TYPE|from|proposalId|value|acceptedId|acceptedValue
+TYPE:from:proposalId:value:acceptedId:acceptedValue
 ```
 
 Where `TYPE` in {`PREPARE`, `PROMISE`, `ACCEPT_REQUEST`, `ACCEPTED`}.
@@ -136,11 +136,11 @@ The PS script builds, launches members, sends admin commands using a tiny TCP he
 
 - `src/main/java/org/CouncilMember.java:1`: main entry; starts server, console; handles runtime commands.
 - `src/main/java/org/PaxosNode.java:1`: Paxos logic for proposer/acceptor/learner and state.
-- `src/main/java/org/Message.java:1`, `src/main/java/org/MessageType.java:1`: message model and encoding/decoding.
-- `src/main/java/org/NetworkConfig.java:1`, `src/main/java/org/Endpoint.java:1`: config loader and endpoint mapping.
+- `src/main/java/org/Message.java:1`: message model and encoding/decoding (colon-delimited).
+- `src/main/java/org/NetworkConfig.java:1`: config loader and endpoint mapping (Endpoint co-located).
 - `src/main/java/org/MessageServer.java:1`: TCP listener to receive messages and admin commands.
 - `src/main/java/org/NetworkClient.java:1`: TCP sender with profile simulation.
-- `src/main/java/org/MemberProfile.java:1`: latency/drop simulation and live reconfiguration.
+- `src/main/java/org/MemberProfile.java:1`: latency/drop simulation (profile set at startup only).
 
 ## Notes
 

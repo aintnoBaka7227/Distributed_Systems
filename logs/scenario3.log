@@ -1,23 +1,23 @@
 Scenario 3: Fault-Tolerance
 [S3a] Starting members...
 Starting M1 (reliable)
-46646
+82003
 Starting M2 (latent)
-46648
+82005
 Starting M3 (failure)
-46651
+82008
 Starting M4 (standard)
-46654
+82010
 Starting M5 (standard)
-46656
+82016
 Starting M6 (standard)
-46669
+82022
 Starting M7 (standard)
-46674
+82034
 Starting M8 (standard)
-46683
+82046
 Starting M9 (standard)
-46705
+82070
 Timeout waiting for port 9001
 [S3a] Proposing: M4 -> M5
 [S3a] Waiting for consensus...
@@ -25,29 +25,31 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 9
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 2 / 9
-[wait] missing: M3 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 9
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 7 / 9
+[wait] missing: M5 M9
 [wait] consensus lines seen: 9 / 9
-[S3a] Consensus achieved in 4s
+[S3a] Consensus achieved in 5s
 [S3b] Restarting members...
 Starting M1 (reliable)
-48356
+83742
 Starting M2 (latent)
-48358
+83744
 Starting M3 (failure)
-48361
+83746
 Starting M4 (standard)
-48364
+83750
 Starting M5 (standard)
-48372
+83754
 Starting M6 (standard)
-48378
+83766
 Starting M7 (standard)
-48393
+83774
 Starting M8 (standard)
-48398
+83786
 Starting M9 (standard)
-48408
+83799
 Timeout waiting for port 9001
 [S3b] Proposing: M2 -> M2
 [S3b] Waiting for consensus...
@@ -55,67 +57,76 @@ Timeout waiting for port 9001
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 0 / 9
 [wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 1 / 9
+[wait] consensus lines seen: 0 / 9
 [wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 4 / 9
-[wait] missing: M6 M7 M8 M9
+[wait] consensus lines seen: 2 / 9
+[wait] missing: M2 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 3 / 9
+[wait] missing: M2 M6 M7 M8 M9
 [wait] consensus lines seen: 9 / 9
-[S3b] Consensus achieved in 5s
-kill: (46646): No such process
-kill: (46648): No such process
-kill: (46651): No such process
-kill: (46654): No such process
-kill: (46656): No such process
-kill: (46669): No such process
-kill: (46674): No such process
-kill: (46683): No such process
-kill: (46705): No such process
+[S3b] Consensus achieved in 6s
+kill: (82003): No such process
+kill: (82005): No such process
+kill: (82008): No such process
+kill: (82010): No such process
+kill: (82016): No such process
+kill: (82022): No such process
+kill: (82034): No such process
+kill: (82046): No such process
+kill: (82070): No such process
 [S3c] Restarting members...
 Starting M1 (reliable)
-50077
+85517
 Starting M2 (latent)
-50079
+85519
 Starting M3 (failure)
-50082
+85522
 Starting M4 (standard)
-50088
+85525
 Starting M5 (standard)
-50093
+85531
 Starting M6 (standard)
-50105
+85541
 Starting M7 (standard)
-50123
+85549
 Starting M8 (standard)
-50133
+85558
 Starting M9 (standard)
-50151
+85570
 Timeout waiting for port 9001
 [S3c] Throttling M3 then proposing
 [S3c] Crashing M3 quickly
 [S3c] Proposing: M4 -> M7
 [S3c] Waiting for consensus (8 learners expected)...
-[wait] consensus lines seen: 1 / 8
+[wait] consensus lines seen: 0 / 8
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 8
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 8
+[wait] missing: M1 M2 M3 M4 M5 M6 M7 M8 M9
+[wait] consensus lines seen: 0 / 8
 [wait] missing: M2 M3 M4 M5 M6 M7 M8 M9
-[wait] consensus lines seen: 3 / 8
-[wait] missing: M2 M6 M7 M8 M9
+[wait] consensus lines seen: 2 / 8
+[wait] missing: M2 M3 M5 M6 M7 M8 M9
 [wait] consensus lines seen: 8 / 8
-[wait] missing: M2
-[S3c] Consensus achieved in 2s
-kill: (46646): No such process
-kill: (46648): No such process
-kill: (46651): No such process
-kill: (46654): No such process
-kill: (46656): No such process
-kill: (46669): No such process
-kill: (46674): No such process
-kill: (46683): No such process
-kill: (46705): No such process
-kill: (48356): No such process
-kill: (48358): No such process
-kill: (48361): No such process
-kill: (48364): No such process
-kill: (48372): No such process
-kill: (48378): No such process
-kill: (48393): No such process
-kill: (48398): No such process
-kill: (48408): No such process
+[wait] missing: M3
+[S3c] Consensus achieved in 5s
+kill: (82003): No such process
+kill: (82005): No such process
+kill: (82008): No such process
+kill: (82010): No such process
+kill: (82016): No such process
+kill: (82022): No such process
+kill: (82034): No such process
+kill: (82046): No such process
+kill: (82070): No such process
+kill: (83742): No such process
+kill: (83744): No such process
+kill: (83746): No such process
+kill: (83750): No such process
+kill: (83754): No such process
+kill: (83766): No such process
+kill: (83774): No such process
+kill: (83786): No such process
+kill: (83799): No such process
+kill: (85522): No such process

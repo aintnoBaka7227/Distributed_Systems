@@ -15,6 +15,7 @@ public class MessageServer implements Runnable {
     private final MemberProfile profile;
     private final PaxosNode node;
     private volatile boolean running = true;
+    private int retryLimit = 40;
 
     public MessageServer(int port, MemberProfile profile, PaxosNode node) {
         this.port = port;
@@ -26,7 +27,7 @@ public class MessageServer implements Runnable {
     public void run() {
         ServerSocket serverSocket = null;
         // Retry binding to the port in case a previous process is still releasing it
-        for (int attempt = 0; attempt < 40 && running; attempt++) {
+        for (int attempt = 0; attempt < retryLimit && running; attempt++) {
             try {
                 serverSocket = new ServerSocket(port);
                 Logger.info("Server bound on port " + port);
@@ -48,7 +49,7 @@ public class MessageServer implements Runnable {
         try {
             while (running) {
                 Socket socket = serverSocket.accept();
-                Thread t = new Thread(() -> handle(socket), "Conn-" + socket.getRemoteSocketAddress());
+                Thread t = new Thread(() -> handleIncomingMessage(socket), "Conn-" + socket.getRemoteSocketAddress());
                 t.setDaemon(true);
                 t.start();
             }
@@ -61,15 +62,15 @@ public class MessageServer implements Runnable {
         }
     }
 
-    private void handle(Socket socket) {
+    private void handleIncomingMessage(Socket socket) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
             String line = br.readLine();
             if (line != null) {
                 // simulate receive-side profile
                 if (!profile.beforeNetworkAction()) return; // drop
                 try {
-                    Message m = Message.decode(line);
-                    Logger.messageReceived(m.fromId, m);
+                    Message m = Message.parseMessage(line);
+                    Logger.messageReceived(m.senderID, m);
                     node.onMessage(m);
                 } catch (IllegalArgumentException ex) {
                     // Treat as admin command for automation via TCP (nc)
@@ -90,26 +91,6 @@ public class MessageServer implements Runnable {
             if (cmd.toLowerCase().startsWith("propose ")) {
                 String candidate = cmd.substring("propose ".length()).trim();
                 node.initiateProposal(candidate);
-            } else if (cmd.toLowerCase().startsWith("profile ")) {
-                String name = cmd.substring("profile ".length()).trim();
-                MemberProfile np = MemberProfile.fromName(name);
-                profile.updateFrom(np);
-                System.out.println("Profile updated to " + profile.getName());
-            } else if (cmd.toLowerCase().startsWith("latency ")) {
-                String[] parts = cmd.split("\\s+");
-                if (parts.length >= 3) {
-                    int min = Integer.parseInt(parts[1]);
-                    int max = Integer.parseInt(parts[2]);
-                    profile.setLatency(min, max);
-                    System.out.println("Latency set to " + min + "-" + max + " ms");
-                }
-            } else if (cmd.toLowerCase().startsWith("drop ")) {
-                String[] parts = cmd.split("\\s+");
-                if (parts.length >= 2) {
-                    double rate = Double.parseDouble(parts[1]);
-                    profile.setDropRate(rate);
-                    System.out.println("Drop rate set to " + rate);
-                }
             } else if (cmd.equalsIgnoreCase("crash")) {
                 System.out.println("Crashing by request via TCP...");
                 System.exit(1);
