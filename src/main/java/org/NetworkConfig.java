@@ -9,6 +9,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Package-private Endpoint co-located with NetworkConfig for simplicity
+class Endpoint {
+    public final String id;
+    public final String host;
+    public final int port;
+
+    Endpoint(String id, String host, int port) {
+        this.id = id;
+        this.host = host;
+        this.port = port;
+    }
+
+    @Override
+    public String toString() {
+        return id + "@" + host + ":" + port;
+    }
+}
+
 /**
  * Loads and holds the network configuration mapping member IDs to host:port.
  * Format per line: M1,localhost,9001
@@ -80,4 +98,5 @@ public class NetworkConfig {
         return endpoints.size();
     }
 }
+
 

@@ -13,7 +13,7 @@ enum MessageType {
 
 /**
  * Simple text-based message with key fields for Paxos.
- * Encoded as pipe-delimited: TYPE|from|proposalId|value|accId|accVal
+ * Encoded as colon-delimited: TYPE:from:proposalId:value:accId:accVal
  */
 public class Message {
     public MessageType type;
@@ -65,7 +65,7 @@ public class Message {
 
     /**
      * Encode to a single line for sending over TCP.
-     * @return encoded string
+     * @return encoded string (colon-delimited)
      */
     public String encode() {
         String t = type.name();
@@ -73,16 +73,16 @@ public class Message {
         String v = value == null ? "" : value;
         String aid = acceptedId == null ? "" : Integer.toString(acceptedId);
         String av = acceptedValue == null ? "" : acceptedValue;
-        return String.join("|", t, fromId, pid, v, aid, av);
+        return String.join(":", t, fromId, pid, v, aid, av);
     }
 
     /**
      * Decode from a line of text.
-     * @param line encoded string
+     * @param line encoded string (colon-delimited)
      * @return message instance
      */
     public static Message decode(String line) {
-        String[] parts = line.split("\\|", -1);
+        String[] parts = line.split(":", -1);
         if (parts.length < 2) throw new IllegalArgumentException("Bad message: " + line);
         Message m = new Message();
         m.type = MessageType.valueOf(parts[0]);

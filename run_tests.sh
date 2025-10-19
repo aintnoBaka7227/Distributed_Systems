@@ -7,6 +7,9 @@ cd "$ROOT_DIR"
 CONFIG=${1:-network.config}
 MEMBERS=(M1 M2 M3 M4 M5 M6 M7 M8 M9)
 
+echo "Cleaning previous build and logs..."
+rm -rf out logs 2>/dev/null || true
+
 echo "Compiling sources..."
 if command -v make >/dev/null 2>&1; then
   make build
@@ -157,13 +160,16 @@ scenario3() {
   start_member M8 standard
   start_member M9 standard
   wait_ports 15 9001 9002 9003 9004 9005 9006 9007 9008 9009
-  # M3 starts then crashes
-  echo "[S3c] Proposing: M3 -> M3"; send_cmd 9003 propose M3
-  sleep 1
-  # simulate crash by sending crash command
-  echo "[S3c] Crashing M3"; send_cmd 9003 crash
+  # M3 starts then crashes quickly after PREPARE (before Phase 2)
+  echo "[S3c] Throttling M3 then proposing"
+  send_cmd 9003 latency 800 1200
+  send_cmd 9003 propose M3
+  sleep 0.05
+  # simulate crash quickly to avoid ACCEPT phase from M3
+  echo "[S3c] Crashing M3 quickly"
+  send_cmd 9003 crash
   # Another member drives to consensus
-  sleep 1
+  sleep 0.2
   echo "[S3c] Proposing: M4 -> M7"; send_cmd 9004 propose M7
   echo "[S3c] Waiting for consensus (8 learners expected)..."
   wait_and_time 8 "$TIMEOUT_S3C" S3c || true

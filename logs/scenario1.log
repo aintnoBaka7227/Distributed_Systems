@@ -1,5 +1,6 @@
 Scenario 1: Ideal Network
 [S1] Starting members...
+Timeout waiting for port 9001
 [S1] Proposing: M4 -> M5
 [S1] Waiting for consensus...
 [wait] consensus lines seen: 1 / 9
